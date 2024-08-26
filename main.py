@@ -1,3 +1,4 @@
+import csv
 import sys
 
 from search import AStarSearch, DeliveryProblem, a_star_search, \
@@ -16,17 +17,19 @@ def get_orders_list(lst):
     return orders_list
 
 
-def get_map_routes(line):
-    point, neighbors = line.split(":")
+def get_map_routes(lines):
     routes = MapRoutes(None)
-    for neighbor in neighbors.split("-"):
-        inf = neighbor[1:-1]
-        n,dist = inf.split(",")
-        routes.add_route(point, n, float(dist))
+    for line in lines:
+        point, neighbors = line.rstrip('\n').split(":")
+        if neighbors:
+            for neighbor in neighbors.split("-"):
+                inf = neighbor[1:-1]
+                n, dist = inf.split(",")
+                routes.add_route(point, n, float(dist))
     return routes
 
 def add_air_distances(routes, points, matrix):
-    for p,line in points,matrix:
+    for p,line in zip(points,matrix):
         dists = line.split()
         for index, point in enumerate(points):
             routes.add_air_distance(p, point, float(dists[index]))
@@ -36,13 +39,23 @@ def add_air_distances(routes, points, matrix):
 
 
 if __name__ == '__main__':
-    map_routes = MapRoutes(None)
+    map_file = open(sys.argv[1], "r")
+    data = list(map_file)
+    map_routes = get_map_routes(data)
     print(sys.argv)
     orders_file = open(sys.argv[3], "r")
     orders = get_orders_list(orders_file)
 
+    file_path = 'neighbors_table.csv'  # Update with your file path
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        data = list(reader)
+    points = data[0][1:]  # The header row, without the first column
+    matrix = [' '.join(row[1:]) for row in data[1:]]
+    routes = add_air_distances(map_routes, points, matrix)
+
     start_state = ('#',[False for o in orders], [False for o in orders])
-    problem = DeliveryProblem(start_state, orders, map_routes)
+    problem = DeliveryProblem(start_state, orders, routes)
 
     searcher = AStarSearch()
 
@@ -60,16 +73,6 @@ if __name__ == '__main__':
 
     optimal_path = a_star_search(problem, heuristic=maxPointAirDistHeuristic)
     print(f"Optimal path with maxPointAirDistHeuristic: {optimal_path}")
-    # print(f"Total cost with maxPointAirDistHeuristic: {total_cost}")
-    # # # Standard MST
-    # optimal_path, total_cost = searcher.a_star(problem, heuristic=mst_heuristic)
-    # print(f"Optimal path with MST heuristic: {optimal_path}")
-    # print(f"Total cost with MST heuristic: {total_cost}")
-    # #
-    # # MST revisiting
-    # optimal_path, total_cost = searcher.a_star(problem, heuristic=mst_heuristic_with_revisiting)
-    # print(f"Optimal path with MST heuristic (with revisiting): {optimal_path}")
-    # print(f"Total cost with MST heuristic (with revisiting): {total_cost}")
 
     optimal_path = uniform_cost_search(problem)
     print(f"Path with uniform: {optimal_path}")
