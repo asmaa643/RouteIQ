@@ -1,3 +1,5 @@
+import sys
+
 from search import AStarSearch, DeliveryProblem, a_star_search, \
     uniform_cost_search, depth_first_search
 from heuristics import null_heuristic, maxPointAirDistHeuristic, \
@@ -8,8 +10,8 @@ from order import Order
 
 def get_orders_list(lst):
     orders_list = []
-    for line in lst:
-        src, dest = line.split("-")
+    for line in lst.readlines():
+        src, dest = line.rstrip('\n').split("-")
         orders_list.append(Order(src, dest))
     return orders_list
 
@@ -35,14 +37,9 @@ def add_air_distances(routes, points, matrix):
 
 if __name__ == '__main__':
     map_routes = MapRoutes(None)
-
-    orders = [
-        Order('A', '3'),
-        Order('B', '4'),
-        Order('C', '2'),
-        Order('D', '5'),
-        Order('E', '1')
-    ]
+    print(sys.argv)
+    orders_file = open(sys.argv[3], "r")
+    orders = get_orders_list(orders_file)
 
     start_state = ('#',[False for o in orders], [False for o in orders])
     problem = DeliveryProblem(start_state, orders, map_routes)
