@@ -46,7 +46,7 @@ if __name__ == '__main__':
     orders_file = open(sys.argv[3], "r")
     orders = get_orders_list(orders_file)
 
-    file_path = 'neighbors_table.csv'  # Update with your file path
+    file_path = sys.argv[2]  # Update with your file path
     with open(file_path, 'r') as file:
         reader = csv.reader(file)
         data = list(reader)
@@ -80,9 +80,11 @@ if __name__ == '__main__':
     # optimal_path = depth_first_search(problem)
     # print(f"Path with dfs: {optimal_path}")
 
-    optimal_path = a_star_search(problem, heuristic=sumAirDistHeuristic)
+    optimal_path, total_cost = searcher.a_star(problem, heuristic=sumAirDistHeuristic)
     print(f"Optimal path with sumAirDistHeuristic: {optimal_path}")
+    print(total_cost)
 
-    optimal_path = a_star_search(problem, heuristic=mstAirDistHeuristic)
+    optimal_path, total_cost = searcher.a_star(problem, heuristic=mstAirDistHeuristic)
     print(f"Optimal path with mstAirDistHeuristic: {optimal_path}")
+    print(total_cost)
 
