@@ -199,6 +199,13 @@ class MapRoutes:
                     self.routes[(min(p1, p2), max(p1, p2))] = d
 
 
+
+    def add_route(self, p1, p2, dist):
+        self.routes[(p1, p2)] = dist
+
+    def add_air_distance(self, p1, p2, dist):
+        self.air_distances[(p1, p2)] = dist
+
     def air_distance(self, p1, p2):
         return self.air_distances[(p1, p2)]
 

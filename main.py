@@ -5,6 +5,34 @@ from heuristics import null_heuristic, maxPointAirDistHeuristic, \
 from map_routes import MapRoutes
 from order import Order
 
+
+def get_orders_list(lst):
+    orders_list = []
+    for line in lst:
+        src, dest = line.split("-")
+        orders_list.append(Order(src, dest))
+    return orders_list
+
+
+def get_map_routes(line):
+    point, neighbors = line.split(":")
+    routes = MapRoutes(None)
+    for neighbor in neighbors.split("-"):
+        inf = neighbor[1:-1]
+        n,dist = inf.split(",")
+        routes.add_route(point, n, float(dist))
+    return routes
+
+def add_air_distances(routes, points, matrix):
+    for p,line in points,matrix:
+        dists = line.split()
+        for index, point in enumerate(points):
+            routes.add_air_distance(p, point, float(dists[index]))
+    return routes
+
+
+
+
 if __name__ == '__main__':
     map_routes = MapRoutes(None)
 
