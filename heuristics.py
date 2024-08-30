@@ -6,15 +6,20 @@ def null_heuristic(state, problem):
 
 
 def maxPointAirDistHeuristic(state, problem):
-    remaining_places = (state[1], state[2])
-    distances = []
+    current_location = state[0]
+    remaining_sources, remaining_destinations = state[1], state[2]
+    max_distance = 0
     for index, order in enumerate(problem.orders):
-        if not remaining_places[0][index] and order.source != state[0]:
-            distances.append(problem.map_routes.air_distance(order.source, state[0]))
-            # print('hellooooooooooooooooooo')
-        if not remaining_places[1][index] and order.destination != state[0]:
-            distances.append(problem.map_routes.air_distance(order.destination, state[0]))
-    return max(distances) if distances else 0
+        # Check if the source has not been visited
+        if not remaining_sources[index]:
+            source_dist = problem.map_routes.air_distance(order.source, current_location)
+            max_distance = max(max_distance, source_dist)
+        # Check if the destination has not been visited
+        if not remaining_destinations[index]:
+            destination_dist = problem.map_routes.air_distance(
+                order.destination, current_location)
+            max_distance = max(max_distance, destination_dist)
+    return max_distance
 
 
 def sumAirDistHeuristic(state, problem):

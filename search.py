@@ -43,32 +43,32 @@ class DeliveryProblem:
         return total_cost
 
 
-def a_star_search(problem, heuristic):
-    """
-    Search the node that has the lowest combined cost and heuristic first.
-    """
-    "*** YOUR CODE HERE ***"
-    visited_nodes = list()
-    fringe = util.PriorityQueue()
-    first_state = problem.get_start_state()
-    fringe.push([first_state, [], 0], heuristic(problem.get_start_state(), problem))
-    while not fringe.isEmpty():
-        current_node = fringe.pop()
-        cur_state = current_node[0]
-        cur_actions = current_node[1]
-        if problem.is_goal_state(cur_state):
-            return cur_actions
-        if cur_state in visited_nodes:
-            continue
-        visited_nodes.append(cur_state)
-        children = problem.get_successors(cur_state)
-        for child in children:
-            if child[0] not in visited_nodes:
-                child_action = cur_actions + [child[1]]
-                cost_of_actions = problem.get_cost_of_actions(child_action)
-                fringe.push([child[0], child_action, cost_of_actions],
-                            cost_of_actions + heuristic(child[0], problem))
-    return []
+# def a_star_search(problem, heuristic):
+#     """
+#     Search the node that has the lowest combined cost and heuristic first.
+#     """
+#     "*** YOUR CODE HERE ***"
+#     visited_nodes = list()
+#     fringe = util.PriorityQueue()
+#     first_state = problem.get_start_state()
+#     fringe.push([first_state, [], 0], heuristic(problem.get_start_state(), problem))
+#     while not fringe.isEmpty():
+#         current_node = fringe.pop()
+#         cur_state = current_node[0]
+#         cur_actions = current_node[1]
+#         if problem.is_goal_state(cur_state):
+#             return cur_actions
+#         if cur_state in visited_nodes:
+#             continue
+#         visited_nodes.append(cur_state)
+#         children = problem.get_successors(cur_state)
+#         for child in children:
+#             if child[0] not in visited_nodes:
+#                 child_action = cur_actions + [child[1]]
+#                 cost_of_actions = problem.get_cost_of_actions(child_action)
+#                 fringe.push([child[0], child_action, cost_of_actions],
+#                             cost_of_actions + heuristic(child[0], problem))
+#     return []
 
 class AStarSearch:
     @staticmethod
