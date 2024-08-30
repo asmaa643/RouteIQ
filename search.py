@@ -1,8 +1,4 @@
 import heapq
-from tracemalloc import Statistic
-
-from direct.task.Task import pickup
-
 import util
 
 
@@ -32,37 +28,13 @@ class DeliveryProblem:
             for index, order in enumerate(self.orders):
                 if move == order.source:
                     new_pickup[index] = True
-                    # order.mark_as_pickup()
                 elif move == order.destination and new_pickup[index]:
-                    # order.mark_as_delivered()
                     new_delivered[index] = True
-
-            # if move in self.orders:
-            #     index = self.orders.index(current_location, move)
-            #     new_delivered[index] = True
-            # elif (move, current_location) in self.orders:
-            #     index = self.orders.index(current_location, move)
-            #     new_delivered[index] = True
 
             successors.append(((move, new_pickup, new_delivered),(current_location, move), self.map_routes.get_distance(current_location,move)))
 
         return successors
 
-        # for index, order in enumerate(self.orders):
-
-            # if not delivered[index]:
-            #     if current_location == order.source:
-            #         new_delivered = delivered.copy()
-            #         new_delivered[index] = True
-            #         successor_state = (order.destination, new_delivered)
-            #         step_cost = self.map_routes.get_distance(current_location, order.destination)
-            #         successors.append((successor_state, order.destination, step_cost))
-            #
-            #     elif current_location != order.source:
-            #         step_cost = self.map_routes.get_distance(current_location, order.source)
-            #         successors.append(((order.source, delivered), order.source, step_cost))
-
-        # return successors
 
     def get_cost_of_actions(self, actions):
         total_cost = 0
@@ -206,3 +178,99 @@ def depth_first_search(problem):
                 child_action = cur_actions+[child[1]]
                 fringe.push([child[0], child_action, problem.get_cost_of_actions(child_action)])
     return []
+
+######################### Search Planning ##########################
+
+
+class Node:
+    """AIMA: A node in a search tree."""
+
+    def __init__(self, state, parent=None, action=None, path_cost=0):
+        """Create a search tree Node, derived from a parent by an action."""
+        self.state = state
+        self.parent = parent
+        self.action = action
+        if parent:
+            self.path_cost = parent.path_cost + path_cost
+            self.depth = parent.depth + 1
+        else:
+            self.path_cost = path_cost
+            self.depth = 0
+
+    def __repr__(self):
+        return "<Node %s>" % (self.state,)
+
+    def nodePath(self):
+        """Create a list of nodes from the root to this node."""
+        x, result = self, [self]
+        while x.parent:
+            result.append(x.parent)
+            x = x.parent
+        result.reverse()
+        return result
+
+    def path(self):
+        """
+        Create a path of actions from the start to the current state
+        """
+        actions = []
+        currnode = self
+        while currnode.parent:
+            actions.append(currnode.action)
+            currnode = currnode.parent
+        actions.reverse()
+        return actions
+
+    def expand(self, problem):
+        """Return a list of nodes reachable from this node."""
+        return [Node(next, self, act, cost)
+                for (next, act, cost) in problem.get_successors(self.state)]
+
+
+REVERSE_PUSH = False
+
+
+def graphSearch(problem, fringe):
+    """Search through the successors of a problem to find a goal."""
+    startstate = problem.get_start_state()
+    fringe.push(Node(problem.get_start_state()))
+    try:
+        startstate.__hash__()
+        visited = set()
+    except:
+        visited = list()
+
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.is_goal_state(node.state):
+            return node.path()
+        try:
+            inVisited = node.state in visited
+        except:
+            visited = list(visited)
+            inVisited = node.state in visited
+
+        if not inVisited:
+            if isinstance(visited, list):
+                visited.append(node.state)
+            else:
+                visited.add(node.state)
+            nextNodes = node.expand(problem)
+            if REVERSE_PUSH: nextNodes.reverse()
+            for nextnode in nextNodes:
+                fringe.push(nextnode)
+    return None
+
+
+def nullHeuristic(state, problem=None):
+    """
+    This heuristic is trivial.
+    """
+    return 0
+
+
+def a_star_search_planning(problem, heuristic=nullHeuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    return graphSearch(problem,
+                       util.PriorityQueueWithFunction(
+                           lambda node: node.path_cost + heuristic(node.state, problem)))
