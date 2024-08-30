@@ -5,8 +5,7 @@ import time
 from planning_problem import max_level, PlanningProblem
 import preprocess_search
 from preprocess_planning import create_domain_problem_files
-from search import AStarSearch, DeliveryProblem, a_star_search, \
-    uniform_cost_search, depth_first_search
+from search import*
 from heuristics import null_heuristic, maxPointAirDistHeuristic, \
     sumAirDistHeuristic, mstAirDistHeuristic
 from search import a_star_search_planning
