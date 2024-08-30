@@ -174,3 +174,10 @@ if __name__ == '__main__':
     else:
         print("Could not find a plan in %.2f seconds" % elapsed)
     print("Search nodes expanded: %d" % prob.expanded)
+    total = 0
+    for act in plan:
+        if "Move" in act.get_name():
+            w = act.get_name().split("_")
+            p1, p2 = w[1], w[3]
+            total += map_routes.get_distance(p1, p2)
+    print(f"Total cost planning: {total}")
