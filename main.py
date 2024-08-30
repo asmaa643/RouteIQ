@@ -21,32 +21,32 @@ def get_orders_list(lst):
 
 
 def get_map_routes(lines):
-    routes = MapRoutes(None)
+    c_map_routes = MapRoutes(None)
     for line in lines:
         point, neighbors = line.rstrip('\n').split(":")
         if neighbors:
             for neighbor in neighbors.split("-"):
                 inf = neighbor[1:-1]
                 n, dist = inf.split(",")
-                routes.add_route(point, n, float(dist))
-    return routes
+                c_map_routes.add_route(point, n, float(dist))
+    return c_map_routes
 
-def add_air_distances(routes, points, matrix):
-    for p,line in zip(points,matrix):
+def add_air_distances(air_routes, map_points, air_distances_matrix):
+    for p,line in zip(map_points, air_distances_matrix):
         dists = line.split()
-        for index, point in enumerate(points):
-            routes.add_air_distance(p, point, float(dists[index]))
-    return routes
+        for index, point in enumerate(map_points):
+            air_routes.add_air_distance(p, point, float(dists[index]))
+    return air_routes
 
-def create_domain_problem_files(name, lines, orders):
+def create_domain_problem_files(name, lines, problem_orders):
     domain_file = open("domain"+name, 'w')
     problem_file = open("problem"+name, 'w')
-    points = set()
+    map_points = set()
     actions = list()
     pre = list()
     for line in lines:
         point, neighbors = line.rstrip('\n').split(":")
-        points.add(point)
+        map_points.add(point)
         if neighbors:
             for neighbor in neighbors.split("-"):
                 inf = neighbor[1:-1]
@@ -59,7 +59,7 @@ def create_domain_problem_files(name, lines, orders):
                     + n + "\nadd: @" + point + "\ndelete: @" + n)
     dests = []
     problem_file.write("Initial state: @#")
-    for line in orders.readlines():
+    for line in problem_orders.readlines():
         src, dest = line.rstrip('\n').split("-")
         problem_file.write(" order@" + src)
         actions.append(
@@ -75,7 +75,7 @@ def create_domain_problem_files(name, lines, orders):
     for d in dests:
         problem_file.write(d)
     domain_file.write("Propositions:\n")
-    for point in points:
+    for point in map_points:
         domain_file.write("@" + point + " ")
     for p in pre:
         domain_file.write(p)
