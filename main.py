@@ -69,7 +69,7 @@ def compare(problems, probs):
     a_star_costs = []
 
     for i, problem in enumerate(problems):
-        if (i == 7): break
+        if (i == 8): break
         print("orders list:")
         print([(order.source, order.destination) for order in problem.orders])
         # Null heuristic (Uniform Cost Search behavior)
@@ -119,7 +119,7 @@ def compare(problems, probs):
     import matplotlib.pyplot as plt
 
     plt.figure(figsize=(10, 6))
-    plt.plot(range(1, 8), a_star_times, linestyle='-', color='b',
+    plt.plot(range(1, 9), a_star_times, linestyle='-', color='b',
              label='A* Search')
     plt.xlabel('Orders number')
     plt.ylabel('Time (seconds) taken to find a solution')
@@ -154,10 +154,10 @@ def compare(problems, probs):
     plt.legend(loc='upper center')
     plt.savefig("a_star_vs_planning_time.png", format='png', bbox_inches='tight')
     plt.show()
-###########################################3
+###########################################
 
     plt.figure(figsize=(10, 6))
-    plt.plot(range(1, 8), a_star_costs, linestyle='-', color='b',
+    plt.plot(range(1, 9), a_star_costs, linestyle='-', color='b',
              label='A* Search')
     plt.xlabel('Orders number')
     plt.ylabel("Solution's cost")
@@ -182,6 +182,53 @@ def compare(problems, probs):
     plt.savefig("planning_nodes.png", format='png', bbox_inches='tight')
     plt.show()
     print("Planning results: Done.")
+    ############################ A* #################################
+    mst_costs = []
+    sum_costs = []
+    dfs_costs = []
+    for i, problem in enumerate(problems):
+        if (i == 8): break
+        print("orders list:")
+        print([(order.source, order.destination) for order in problem.orders])
+        ######################
+
+        # optimal_path, total_cost = searcher.a_star(problem,
+        #                                            heuristic=maxPointAirDistHeuristic)
+        # print(f"Optimal path with maxAirDistHeuristic:", total_cost)
+
+
+        optimal_path, sum_cost = searcher.a_star(problem,
+                                                   heuristic=sumAirDistHeuristic)
+        # print(f"Optimal path with sumAirDistHeuristic:", sum_cost)
+        sum_costs.append(sum_cost)
+        # show_path(optimal_path)
+        #
+        optimal_path, mst_cost = searcher.a_star(problem,
+                                                   heuristic=mstAirDistHeuristic)
+        # print(f"Optimal path with mstAirDistHeuristic:", mst_cost)
+        mst_costs.append(mst_cost)
+        # show_path(optimal_path)
+        #
+        # path, dfs = depth_first_search(problem)
+        # print(f"Path with dfs: {dfs}")
+        # dfs_costs.append(dfs)
+
+    plt.figure(figsize=(10, 6))
+
+    plt.xlabel('Orders number')
+    plt.ylabel("Heuristic costs")
+    plt.title("A* Search heuristics costs")
+    plt.grid(True)
+    plt.plot(range(1, 9), mst_costs, linestyle='-', color='g',
+             label='mst')
+    plt.plot(range(1, 9), sum_costs, linestyle='-', color='y',
+             label='sum')
+    plt.plot(range(1, 9), a_star_costs, linestyle='--', color='b',
+             label='max')
+    plt.legend(loc='upper center')
+    plt.savefig("a_star_vs.png", format='png',
+                bbox_inches='tight')
+    plt.show()
 
 
 
