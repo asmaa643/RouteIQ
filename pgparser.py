@@ -3,17 +3,23 @@ from proposition import Proposition
 
 class PgParser:
     """
-    A utility class for parsing the domain and problem.
+     A utility class for parsing the domain and problem files used in automated planning.
     """
 
     def __init__(self, domain_file, problem_file):
         """
-        Constructor
+         Constructor to initialize the parser with domain and problem files.
         """
         self.domain_file = domain_file
         self.problem_file = problem_file
 
+
     def parse_actions_and_propositions(self):
+        """
+            Parses the domain file specified by self.domain_file to extract Proposition and Action objects.
+            Updates actions with the corresponding Proposition instances for their preconditions, add effects,
+            and delete effects.
+        """
         propositions = []
         f = open(self.domain_file, 'r')
         _ = f.readline()
@@ -66,6 +72,11 @@ class PgParser:
                 return prop
 
     def parse_problem(self):
+        """
+            Parses the domain file specified by self.domain_file to extract Proposition and Action objects.
+            Updates actions with the corresponding Proposition instances for their preconditions, add effects,
+            and delete effects.
+            """
         init = []
         goal = []
         f = open(self.problem_file, 'r')
@@ -90,7 +101,7 @@ class Action(object):
 
     def __init__(self, name, pre, add, delete, is_noop=False):
         """
-        Constructor
+        Constructor to initialize an action with its name, preconditions, add effects, and delete effects.
         """
         self.pre = pre  # list of the precondition propositions
         self.add = add  # list of the propositions that will be added after applying the action
@@ -99,37 +110,50 @@ class Action(object):
         self.noOp = is_noop  # true if the action is a noOp
 
     def get_pre(self):
+        """
+        Returns the list of preconditions
+        """
         return self.pre
 
     def get_add(self):
+        """
+        Returns the list of propositions to be added.
+        """
         return self.add
 
     def get_delete(self):
+        """
+        Returns the list of propositions to be deleted.
+        """
         return self.delete
 
     def get_name(self):
+        """
+         Returns the name of the action.
+        """
         return self.name
 
     def is_pre_cond(self, prop):
+        """
+         Checks if a proposition is a precondition for the action.
+        """
         return prop in self.pre
 
     def is_pos_effect(self, prop):
         """
-        True if the proposition prop is a positive effect of the action
+        Checks if a proposition is a positive effect of the action.
         """
         return prop in self.add
 
     def is_neg_effect(self, prop):
         """
-        Returns true if the proposition prop is a negative effect of the action
+        Checks if a proposition is a negative effect of the action.
         """
         return prop in self.delete
 
     def all_preconds_in_list(self, propositions):
         """
-        Returns true if all the precondition of the action
-        are in the propositions list / set
-        propositions must be iterable
+       Checks if all preconditions of the action are in a given list of propositions.
         """
         for pre in self.pre:
             if pre not in propositions:
@@ -138,22 +162,37 @@ class Action(object):
 
     def is_noop(self):
         """
-        Returns true if the action in noOp action
+        Returns whether the action is a no-op.
         """
         return self.noOp
 
     def __eq__(self, other):
+        """
+         Checks if two actions are equal based on their names.
+        """
         return (isinstance(other, self.__class__)
                 and self.name == other.name)
 
     def __str__(self):
+        """
+        Returns the string representation of the action (its name).
+        """
         return self.name
 
     def __ne__(self, other):
+        """
+        Checks if two actions are not equal.
+        """
         return not self.__eq__(other)
 
     def __lt__(self, other):
+        """
+        Compares two actions based on their names.
+        """
         return self.name < other.name
 
     def __hash__(self):
+        """
+        Returns the hash of the action's name.
+        """
         return hash(self.name)

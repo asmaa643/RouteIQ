@@ -2,10 +2,19 @@ import networkx as nx
 
 
 def null_heuristic(state, problem):
+    """
+    A heuristic function that always returns 0. This is typically used as a baseline heuristic
+    in search algorithms such as A*.
+    """
     return 0
 
 
+
 def maxPointAirDistHeuristic(state, problem):
+    """
+    Heuristic function that computes the maximum straight-line (air) distance from the current location
+    to any unvisited source or destination.
+    """
     current_location = state[0]
     remaining_sources, remaining_destinations = state[1], state[2]
     max_distance = 0
@@ -22,7 +31,12 @@ def maxPointAirDistHeuristic(state, problem):
     return max_distance
 
 
+
 def sumAirDistHeuristic(state, problem):
+    """
+    Heuristic function that computes the sum of the minimum distances required to visit all unvisited
+    sources and destinations starting from the current location.
+    """
     places = (state[1], state[2])
     orders = problem.orders
     remaining_places = []
@@ -49,7 +63,12 @@ def sumAirDistHeuristic(state, problem):
 
 
 
+
 def mstAirDistHeuristic(state, problem):
+    """
+    Heuristic function that computes the weight of the Minimum Spanning Tree (MST) for the remaining
+    unvisited sources and destinations using air distances.
+     """
     places = (state[1], state[2])
     orders = problem.orders
     remaining_places = []

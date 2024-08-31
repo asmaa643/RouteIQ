@@ -4,6 +4,9 @@ import util
 
 class DeliveryProblem:
     def __init__(self, start_state, orders, map_routes):
+        """
+        Initializes the delivery problem with the start state, orders, and map routes.
+        """
         self.start_state = start_state
         self.orders = orders
         self.map_routes = map_routes
@@ -117,7 +120,7 @@ class AStarSearch:
 
 def uniform_cost_search(problem):
     """
-    Search the node of least total cost first.
+    Performs Uniform Cost Search to find the path with the least total cost.
     """
     "*** YOUR CODE HERE ***"
     visited_nodes = []
@@ -145,7 +148,7 @@ def uniform_cost_search(problem):
 
 def depth_first_search(problem):
     """
-    Search the deepest nodes in the search tree first.
+    Performs Depth First Search to explore the deepest nodes in the search tree first.
 
     Your search algorithm needs to return a list of actions that reaches
     the goal. Make sure to implement a graph search algorithm.
@@ -196,7 +199,7 @@ def depth_first_search(problem):
 
 
 class Node:
-    """AIMA: A node in a search tree."""
+    """A node in a search tree."""
 
     def __init__(self, state, parent=None, action=None, path_cost=0):
         """Create a search tree Node, derived from a parent by an action."""

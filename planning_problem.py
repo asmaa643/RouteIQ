@@ -5,6 +5,11 @@ from search import a_star_search_planning
 
 
 class PlanningProblem:
+    """
+       Represents a planning problem based on a domain and problem file.
+       Manages actions, propositions, initial state, and goal state.
+    """
+
     def __init__(self, domain_file, problem_file):
         """
         Constructor
@@ -27,9 +32,15 @@ class PlanningProblem:
         self.expanded = 0
 
     def get_start_state(self):
+        """
+        Returns the initial state of the planning problem.
+        """
         return self.initialState
 
     def is_goal_state(self, state):
+        """
+        Checks if the given state satisfies the goal state.
+        """
         return not self.goal_state_not_in_prop_layer(state)
 
     def get_successors(self, state):

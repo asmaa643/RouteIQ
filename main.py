@@ -10,8 +10,19 @@ from heuristics import null_heuristic, maxPointAirDistHeuristic, \
     sumAirDistHeuristic, mstAirDistHeuristic
 from search import a_star_search_planning
 
+"""
+This script compares the performance of different search algorithms and heuristics 
+in solving a delivery problem with multiple orders. It utilizes A* search and planning 
+algorithms to find optimal delivery paths, based on various heuristics such as air distances 
+and minimum spanning tree calculations.
+"""
+
+
 
 def show_path(path):
+    """
+        Displays the path of moves taken.
+    """
     to_show = "#"
     for move in path:
         to_show += " -> " + move[1]
@@ -19,6 +30,9 @@ def show_path(path):
 
 
 def create_A_search_problems(commands):
+    """
+        Prepares the A* search problems based on input commands.
+    """
     map_file = open(commands[1], "r")
     data = list(map_file)
     map_routes = preprocess_search.get_map_routes(data)
@@ -45,6 +59,9 @@ def create_A_search_problems(commands):
 
 
 def create_planning_problem(commands):
+    """
+        Prepares planning problems for comparison.
+    """
     map_file = open(commands[1], "r")
     data = list(map_file)
     orders_file = open(commands[3], "r")
@@ -62,6 +79,9 @@ def create_planning_problem(commands):
 
 
 def compare(problems, probs):
+    """
+        Compares the performance of A* search and planning.
+    """
     searcher = AStarSearch()
     import time
 
@@ -234,6 +254,9 @@ def compare(problems, probs):
 
 
 def run_num_orders(search, planning, num):
+    """
+        Runs the search and planning algorithms for a specific number of orders.
+    """
     searcher = AStarSearch()
     search_problem = search[num - 1]
     print("The orders list is:"),
@@ -272,7 +295,11 @@ def run_num_orders(search, planning, num):
         print("Could not find a plan in %.2f seconds" % elapsed_time)
 
 
+
 if __name__ == '__main__':
+    """
+    Run this script with appropriate command-line arguments to specify the input files and desired operations.
+    """
     ############################## Commands format #######################
     # 1: map, 2: air distances on map, 3: orders list
     # 4: (ordersNum=*) / (compare) / ()

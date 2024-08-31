@@ -1,4 +1,9 @@
+
 def create_domain_problem_files(name, lines, problem_orders):
+    """
+        Creates domain and problem files based on provided data.
+
+    """
     domain_file = open("domain"+name, 'w')
     problem_file = open("problem"+name, 'w')
     map_points = set()
@@ -22,6 +27,9 @@ def create_domain_problem_files(name, lines, problem_orders):
 
 
 def process_problem(actions, dests, pre, problem_file, problem_orders):
+    """
+    Processes problem orders to generate actions and initial/goal states.
+    """
     for line in problem_orders:
         src, dest = line.rstrip('\n').split("-")
         problem_file.write(" order@" + src)
@@ -37,6 +45,9 @@ def process_problem(actions, dests, pre, problem_file, problem_orders):
 
 
 def process_domain(actions, lines, map_points):
+    """
+    Processes domain data to generate propositions and actions.
+    """
     for line in lines:
         point, neighbors = line.rstrip('\n').split(":")
         map_points.add(point)

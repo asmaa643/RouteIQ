@@ -14,14 +14,23 @@ class PlanGraphLevel(object):
 
     @staticmethod
     def set_independent_actions(independent_actions):
+        """
+        Sets the independent_actions attribute.
+        """
         PlanGraphLevel.independent_actions = independent_actions
 
     @staticmethod
     def set_actions(actions):
+        """
+        Sets the actions attribute.
+        """
         PlanGraphLevel.actions = actions
 
     @staticmethod
     def set_props(props):
+        """
+        Sets the props attribute.
+        """
         PlanGraphLevel.props = props
 
     def __init__(self):
@@ -31,7 +40,11 @@ class PlanGraphLevel(object):
         self.action_layer = ActionLayer()  # see action_layer.py
         self.proposition_layer = PropositionLayer()  # see proposition_layer.py
 
-    def get_proposition_layer(self):  # returns the proposition layer
+    def get_proposition_layer(self):
+        """
+        Returns the current PropositionLayer.
+        """
+        # returns the proposition layer
         return self.proposition_layer
 
     def set_proposition_layer(self, prop_layer):  # sets the proposition layer
