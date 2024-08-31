@@ -5,7 +5,7 @@ import time
 from planning_problem import max_level, PlanningProblem
 import preprocess_search
 from preprocess_planning import create_domain_problem_files
-from search import*
+from search import *
 from heuristics import null_heuristic, maxPointAirDistHeuristic, \
     sumAirDistHeuristic, mstAirDistHeuristic
 from search import a_star_search_planning
@@ -37,10 +37,12 @@ def create_A_search_problems(commands):
 
     problems = []
     for i in range(len(orders)):
-        start_state = ('#', [False for _ in orders[:i+1]], [False for _ in orders[:i+1]])
+        start_state = (
+        '#', [False for _ in orders[:i + 1]], [False for _ in orders[:i + 1]])
 
-        problems.append(DeliveryProblem(start_state, orders[:i+1], routes))
-    return problems,routes
+        problems.append(DeliveryProblem(start_state, orders[:i + 1], routes))
+    return problems, routes
+
 
 def create_planning_problem(commands):
     map_file = open(commands[1], "r")
@@ -49,30 +51,25 @@ def create_planning_problem(commands):
     orders = list(orders_file)
     problems = []
     for i in range(len(orders)):
-        create_domain_problem_files(sys.argv[1], data, orders[:i+1])
+        create_domain_problem_files(sys.argv[1], data, orders[:i + 1])
         domain = "domain" + commands[1]
         problem = "problem" + commands[1]
         problems.append(PlanningProblem(domain, problem))
     map_file.close()
     orders_file.close()
 
-
-
     return problems
 
-if __name__ == '__main__':
 
-    ############################### A* Search ############################
-
-    problems, routes = create_A_search_problems(sys.argv)
-
+def compare(problems, probs):
     searcher = AStarSearch()
     import time
 
     a_star_times = []
+    a_star_costs = []
 
     for i, problem in enumerate(problems):
-        if (i == 8): break
+        if (i == 7): break
         print("orders list:")
         print([(order.source, order.destination) for order in problem.orders])
         # Null heuristic (Uniform Cost Search behavior)
@@ -87,20 +84,20 @@ if __name__ == '__main__':
         # optimal_path = uniform_cost_search(problem)
         # print(f"Path with uniform:")
         # show_path(optimal_path)
-######################
+        ######################
 
         start_time = time.time()
 
         optimal_path, total_cost = searcher.a_star(problem,
                                                    heuristic=maxPointAirDistHeuristic)
         end_time = time.time()
-        print(f"Optimal path with maxPointAirDistHeuristic:", total_cost)
-        show_path(optimal_path)
-
+        # print(f"Optimal path with maxPointAirDistHeuristic:", total_cost)
+        # show_path(optimal_path)
 
         # Calculate elapsed time in seconds and append to the list
         elapsed_time = (end_time - start_time)
         a_star_times.append(elapsed_time)
+        a_star_costs.append(total_cost)
 
         # optimal_path = a_star_search(problem,
         #                              heuristic=maxPointAirDistHeuristic)
@@ -110,62 +107,137 @@ if __name__ == '__main__':
         # optimal_path = depth_first_search(problem)
         # print(f"Path with dfs: {optimal_path}")
 
-        optimal_path, total_cost = searcher.a_star(problem,
-                                                   heuristic=sumAirDistHeuristic)
-        print(f"Optimal path with sumAirDistHeuristic:", total_cost)
-        show_path(optimal_path)
-
-        optimal_path, total_cost = searcher.a_star(problem,
-                                                   heuristic=mstAirDistHeuristic)
-        print(f"Optimal path with mstAirDistHeuristic:", total_cost)
-        show_path(optimal_path)
+        # optimal_path, total_cost = searcher.a_star(problem,
+        #                                            heuristic=sumAirDistHeuristic)
+        # print(f"Optimal path with sumAirDistHeuristic:", total_cost)
+        # show_path(optimal_path)
+        #
+        # optimal_path, total_cost = searcher.a_star(problem,
+        #                                            heuristic=mstAirDistHeuristic)
+        # print(f"Optimal path with mstAirDistHeuristic:", total_cost)
+        # show_path(optimal_path)
     import matplotlib.pyplot as plt
 
     plt.figure(figsize=(10, 6))
-    plt.plot(range(1, 9), a_star_times, marker='o', linestyle='-', color='b')
-    plt.xlabel('Range (1-9)')
-    plt.ylabel('Time (seconds)')
-    plt.title('Time taken for code execution across different ranges')
+    plt.plot(range(1, 8), a_star_times, linestyle='-', color='b',
+             label='A* Search')
+    plt.xlabel('Orders number')
+    plt.ylabel('Time (seconds) taken to find a solution')
+    plt.title('Time taken for code execution across different orders numbers')
     plt.grid(True)
-    # plt.show()
-    plt.savefig("a_star.png", format='png', bbox_inches='tight')
 
     ############################### Planning ############################
     planning_times = []
-
-    probs = create_planning_problem(sys.argv)
-    for i,prob in enumerate(probs):
-        if i == 7: break
-        # start = time.perf_counter()
+    planning_costs = []
+    planning_nodes = []
+    for i, prob in enumerate(probs):
+        if i == 6: break
+        print([(order.source, order.destination) for order in problems[i].orders])
         start_time = time.time()
         plan = a_star_search_planning(prob, max_level)
         end_time = time.time()
-
-        # Calculate elapsed time in seconds and append to the list
         elapsed_time = (end_time - start_time)
         planning_times.append(elapsed_time)
-
-        # elapsed = time.perf_counter() - start
         if plan is not None:
-            print("Plan found with %d actions in %.2f seconds" % (
-                len(plan), elapsed_time))
+            total = 0
             for act in plan:
-                print(act.get_name())
-        else:
-            print("Could not find a plan in %.2f seconds" % elapsed_time)
-        print("Search nodes expanded: %d" % prob.expanded)
+                if "Move" in act.get_name():
+                    w = act.get_name().split("_")
+                    p1, p2 = w[1], w[3]
+                    total += routes.get_distance(p1, p2)
+            planning_costs.append(total)
+        planning_nodes.append(prob.expanded)
+
+    plt.plot(range(1, 7), planning_times, linestyle='-', color='r',
+             label='Planning')
+    # plt.show()
+    plt.legend(loc='upper center')
+    plt.savefig("a_star_vs_planning_time.png", format='png', bbox_inches='tight')
+    plt.show()
+###########################################3
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(1, 8), a_star_costs, linestyle='-', color='b',
+             label='A* Search')
+    plt.xlabel('Orders number')
+    plt.ylabel("Solution's cost")
+    plt.title("Solutions' Costs across different orders numbers")
+    plt.grid(True)
+    plt.plot(range(1, 7), planning_costs, linestyle='-', color='r',
+             label='Planning')
+    # plt.show()
+    plt.legend(loc='upper center')
+    plt.savefig("a_star_vs_planning_cost.png", format='png', bbox_inches='tight')
+    plt.show()
+
+    print("Comparing A* star and planning: Done.")
+##################################################33
+    plt.figure(figsize=(10, 6))
+    plt.xlabel('Orders number')
+    plt.ylabel("Expanded nodes")
+    plt.title("Expanded nodes in planning across different orders numbers")
+    plt.grid(True)
+    plt.plot(range(1, 7), planning_nodes, linestyle='-', color='r',
+             label='expanded nodes')
+    plt.savefig("planning_nodes.png", format='png', bbox_inches='tight')
+    plt.show()
+    print("Planning results: Done.")
+
+
+
+
+def run_num_orders(search, planning, num):
+    searcher = AStarSearch()
+    search_problem = search[num - 1]
+    print("The orders list is:"),
+    for order in search_problem.orders:
+        print("(", order.source,",", order.destination,")")
+    start_time = time.time()
+    optimal_path, total_cost = searcher.a_star(search_problem,
+                                               heuristic=maxPointAirDistHeuristic)
+    end_time = time.time()
+    elapsed_time = (end_time - start_time)
+    print(f"A* found the optimal path with cost", total_cost,
+          "in %.2f seconds" % elapsed_time, "\nBy taking this path:")
+    show_path(optimal_path)
+    print()
+    planning_problem = planning[num - 1]
+    start_time = time.time()
+    plan = a_star_search_planning(planning_problem, max_level)
+    end_time = time.time()
+    elapsed_time = (end_time - start_time)
+    if plan is not None:
+        plan_ = "#"
         total = 0
         for act in plan:
             if "Move" in act.get_name():
                 w = act.get_name().split("_")
                 p1, p2 = w[1], w[3]
                 total += routes.get_distance(p1, p2)
-        print(f"Total cost planning: {total}")
-    plt.figure(figsize=(10, 6))
-    plt.plot(range(1, 8), planning_times, marker='o', linestyle='-', color='b')
-    plt.xlabel('Range (1-9)')
-    plt.ylabel('Time (seconds)')
-    plt.title('Time taken for code execution across different ranges')
-    plt.grid(True)
-    # plt.show()
-    plt.savefig("planning.png", format='png', bbox_inches='tight')
+                plan_ += " -> " + p2
+        print("Planning found a plan with %d actions and %.2f cost in %.2f seconds" % (
+            len(plan), total, elapsed_time ))
+        print("By following this plan:")
+        print(plan_)
+        if total == total_cost:
+            print("\nFound the same PATH/ COST")
+    else:
+        print("Could not find a plan in %.2f seconds" % elapsed_time)
+
+
+if __name__ == '__main__':
+    ############################## Commands format #######################
+    # 1: map, 2: air distances on map, 3: orders list
+    # 4: (ordersNum=*) / (compare) / ()
+    #           |            |
+    #    from 1 to *     Show overall results
+
+    ############################### A* Search ############################
+
+    problems, routes = create_A_search_problems(sys.argv)
+    probs = create_planning_problem(sys.argv)
+    if sys.argv[4] == "compare":
+        compare(problems, probs)
+
+    if sys.argv[4].split("=")[0] == "ordersNum":
+        run_num_orders(problems, probs, int(sys.argv[4].split("=")[1]))
