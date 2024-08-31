@@ -29,9 +29,9 @@ class DeliveryProblem:
             new_pickup = pickup.copy()
             new_delivered = delivered.copy()
             for index, order in enumerate(self.orders):
-                if move == order.source:
+                if move == order.source and not new_pickup[index]:
                     new_pickup[index] = True
-                elif move == order.destination and new_pickup[index]:
+                elif move == order.destination and new_pickup[index] and not new_delivered[index]:
                     new_delivered[index] = True
 
             successors.append(((move, new_pickup, new_delivered),(current_location, move), self.map_routes.get_distance(current_location,move)))

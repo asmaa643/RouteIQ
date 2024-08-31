@@ -314,4 +314,23 @@ if __name__ == '__main__':
         compare(problems, probs)
 
     if sys.argv[4].split("=")[0] == "ordersNum":
+        import matplotlib.pyplot as plt
+        import matplotlib.image as mpimg
+
+        # Load an image from a file
+        img = mpimg.imread(
+            'map_f.jpg')  # Replace with your image file path
+
+        # Display the image
+        plt.imshow(img)
+        plt.axis('off')  # Hide the axes
+        plt.show(
+            block=True)  # Ensures the window remains open until manually closed
+
+        # Prompt the user for input after the image is closed
+        user_input = input("Please enter your input: ")
+
+        # Print or use the user input
+        print(f'You entered: {user_input}')
+
         run_num_orders(problems, probs, int(sys.argv[4].split("=")[1]))
