@@ -72,20 +72,23 @@ def mstAirDistHeuristic(state, problem):
     places = (state[1], state[2])
     orders = problem.orders
     remaining_places = []
+
     for index, order in enumerate(orders):
         if not places[0][index]:
             remaining_places.append(order.source)
         if not places[1][index]:
             remaining_places.append(order.destination)
+
+    if len(remaining_places) <= 1:
+        return 0
+
     graph = nx.Graph()
-    edges_weighted = {(p1, p2,
-                       problem.map_routes.air_distance(p1, p2))
-                      for p1 in remaining_places
-                      for p2 in remaining_places
-                      if p1 != p2}
 
-    for edge in edges_weighted:
-        graph.add_edge(edge[0], edge[1], weight=edge[2])
+    for i in range(len(remaining_places)):
+        for j in range(i + 1, len(remaining_places)):
+            p1, p2 = remaining_places[i], remaining_places[j]
+            weight = problem.map_routes.air_distance(p1, p2)
+            graph.add_edge(p1, p2, weight=weight)
 
-    mst = nx.tree.minimum_spanning_tree(graph)
+    mst = nx.minimum_spanning_tree(graph)
     return mst.size(weight='weight')
