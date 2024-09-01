@@ -310,13 +310,17 @@ if __name__ == '__main__':
 
     problems, routes = create_A_search_problems(sys.argv)
     probs = create_planning_problem(sys.argv)
-    if sys.argv[4] == "compare":
+    if sys.argv[4] == "results":
         compare(problems, probs)
 
     if sys.argv[4].split("=")[0] == "ordersNum":
+
+        run_num_orders(problems, probs, int(sys.argv[4].split("=")[1]))
+    if sys.argv[4] == "input":
         import matplotlib.pyplot as plt
         import matplotlib.image as mpimg
 
+        plt.figure(figsize=(10, 6))
         # Load an image from a file
         img = mpimg.imread(
             'map_f.jpg')  # Replace with your image file path
@@ -326,11 +330,18 @@ if __name__ == '__main__':
         plt.axis('off')  # Hide the axes
         plt.show(
             block=True)  # Ensures the window remains open until manually closed
-
+        user_orders = open("user orders.txt", 'w')
         # Prompt the user for input after the image is closed
         user_input = input("Please enter your input: ")
+        while user_input != "done":
+            user_orders.write(user_input+'\n')
+            user_input = input("Please enter your input: ")
+        user_orders.close()
+        problems, routes = create_A_search_problems([0, sys.argv[1], sys.argv[2], "user orders.txt"])
+        probs = create_planning_problem([0, sys.argv[1], sys.argv[2], "user orders.txt"])
+        run_num_orders(problems, probs, 0)
+
+
 
         # Print or use the user input
-        print(f'You entered: {user_input}')
-
-        run_num_orders(problems, probs, int(sys.argv[4].split("=")[1]))
+        # print(f'You entered: {user_input}')

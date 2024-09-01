@@ -1,7 +1,6 @@
 from proposition_layer import PropositionLayer
 from plan_graph_level import PlanGraphLevel
 from pgparser import PgParser, Action
-from search import a_star_search_planning
 
 
 class PlanningProblem:

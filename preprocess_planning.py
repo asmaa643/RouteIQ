@@ -35,13 +35,13 @@ def process_problem(actions, dests, pre, problem_file, problem_orders):
         problem_file.write(" order@" + src)
         actions.append(
             "\nName: Pickup_Order_" + dest + "\npre: @" + src + " order@"
-            + src + "\nadd: has_Order_" + dest + "\ndelete: order@" + src)
-        dests.append(" deliver_order_" + dest)
+            + src + "\nadd: has_Order_" + src+dest + "\ndelete: order@" + src)
+        dests.append(" deliver_order_" + src+dest)
         actions.append(
-            "\nName: Deliver_Order_" + dest + "\npre: @" + dest + " has_Order_"
-            + dest + "\nadd: deliver_order_" + dest + "\ndelete: has_Order_" + dest)
+            "\nName: Deliver_Order_" + src+dest + "\npre: @" + dest + " has_Order_"
+            + src+dest + "\nadd: deliver_order_" + src+dest + "\ndelete: has_Order_" + src+dest)
         pre.append(
-            "order@" + src + " has_Order_" + dest + " deliver_order_" + dest + " ")
+            "order@" + src + " has_Order_" + src+dest + " deliver_order_" + src+dest + " ")
 
 
 def process_domain(actions, lines, map_points):
