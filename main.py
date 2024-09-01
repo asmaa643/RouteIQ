@@ -108,7 +108,7 @@ def compare(problems_, probs_):
                      probs_)
     ############################### First plot ############################
 
-    plt.plot(range(1, 7), planning_times, linestyle='-', color='r',
+    plt.plot(range(1, 8), planning_times, linestyle='-', color='r',
              label='Planning')
     # plt.show()
     plt.legend(loc='upper center')
@@ -132,7 +132,7 @@ def planning_plot(planning_nodes):
     plt.ylabel("Expanded nodes")
     plt.title("Expanded nodes in planning across different orders numbers")
     plt.grid(True)
-    plt.plot(range(1, 7), planning_nodes, linestyle='-', color='r',
+    plt.plot(range(1, 8), planning_nodes, linestyle='-', color='r',
              label='expanded nodes')
     plt.savefig("planning_nodes.png", format='png', bbox_inches='tight')
     plt.show()
@@ -146,7 +146,7 @@ def a_star_planning_costs(a_star_costs, planning_costs):
     plt.ylabel("Solution's cost")
     plt.title("Solutions' Costs across different orders numbers")
     plt.grid(True)
-    plt.plot(range(1, 7), planning_costs, linestyle='-', color='r',
+    plt.plot(range(1, 8), planning_costs, linestyle='-', color='r',
              label='Planning')
     # plt.show()
     plt.legend(loc='upper center')
@@ -157,14 +157,9 @@ def a_star_planning_costs(a_star_costs, planning_costs):
 
 def a_star_compare_results(a_star_costs, problems_, searcher):
     mst_costs = []
-    sum_costs = []
     for i, problem in enumerate(problems_):
         if i == 8: break
-        print("orders list:")
-        print([(order.source, order.destination) for order in problem.orders])
-        optimal_path, sum_cost = searcher.a_star(problem,
-                                                 heuristic=sumAirDistHeuristic)
-        sum_costs.append(sum_cost)
+        print("Run mst over", i+1)
         optimal_path, mst_cost = searcher.a_star(problem,
                                                  heuristic=mstAirDistHeuristic)
         mst_costs.append(mst_cost)
@@ -175,12 +170,10 @@ def a_star_compare_results(a_star_costs, problems_, searcher):
     plt.grid(True)
     plt.plot(range(1, 9), mst_costs, linestyle='-', color='g',
              label='mst')
-    plt.plot(range(1, 9), sum_costs, linestyle='-', color='y',
-             label='sum')
     plt.plot(range(1, 9), a_star_costs, linestyle='--', color='b',
              label='max')
     plt.legend(loc='upper center')
-    plt.savefig("a_star_vs.png", format='png',
+    plt.savefig("max_vs_mst.png", format='png',
                 bbox_inches='tight')
     plt.show()
 
@@ -188,9 +181,11 @@ def a_star_compare_results(a_star_costs, problems_, searcher):
 def planning_results(planning_costs, planning_nodes, planning_times, problems_,
                      probs_):
     for i, prob in enumerate(probs_):
-        if i == 6: break
-        print([(order.source, order.destination) for order in
-               problems_[i].orders])
+        if i == 7: break
+        print("Run planning over", i+1, "orders")
+
+        # print([(order.source, order.destination) for order in
+        #        problems_[i].orders])
         start_time = time.time()
         plan = a_star_search_planning(prob, max_level)
         end_time = time.time()
@@ -210,8 +205,8 @@ def planning_results(planning_costs, planning_nodes, planning_times, problems_,
 def a_star_results(a_star_costs, a_star_times, problems_, searcher):
     for i, problem in enumerate(problems_):
         if i == 8: break
-        print("orders list:")
-        print([(order.source, order.destination) for order in problem.orders])
+        print("Run a_star over", i+1, "orders")
+        # print([(order.source, order.destination) for order in problem.orders])
 
         start_time = time.time()
 
@@ -256,6 +251,7 @@ def check_plan(elapsed_time, plan, total_cost):
         plan_ = "#"
         total = 0
         for act in plan:
+            print(act.get_name())
             if "Move" in act.get_name():
                 w = act.get_name().split("_")
                 p1, p2 = w[1], w[3]
@@ -264,7 +260,7 @@ def check_plan(elapsed_time, plan, total_cost):
         print(
             "Planning found a plan with %d actions and %.2f cost in %.2f seconds" % (
                 len(plan), total, elapsed_time))
-        print("By following this plan:")
+        print("By following this path:")
         print(plan_)
         if total == total_cost:
             print("\nFound the same PATH/ COST")
