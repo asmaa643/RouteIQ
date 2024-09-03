@@ -177,6 +177,44 @@ def depth_first_search(problem):
 
     return ([], 0)  # If no solution found, return an empty path and zero cost
 
+def breadth_first_search(problem):
+    """
+    Search the shallowest nodes in the search tree first.
+    """
+    "*** YOUR CODE HERE ***"
+    visited_nodes = list()
+    fringe = util.Queue()
+    first_state = problem.get_start_state()
+    fringe.push(
+        [first_state, [], 0])  # The stack stores tuples of (state, path, cost)
+
+    while not fringe.isEmpty():
+        current_node = fringe.pop()
+        cur_state = current_node[0]
+        cur_actions = current_node[1]
+        cur_cost = current_node[2]
+
+        if problem.is_goal_state(cur_state):
+            return (
+                cur_actions,
+                cur_cost)  # Return the path and the cost as a tuple
+
+        if cur_state in visited_nodes:
+            continue
+
+        visited_nodes.append(cur_state)
+        children = problem.get_successors(cur_state)
+
+        for child in children:
+            child_state = child[0]
+            child_action = child[1]
+            child_cost = child[2]
+            if child_state not in visited_nodes:
+                new_actions = cur_actions + [child_action]
+                new_cost = cur_cost + child_cost
+                fringe.push([child_state, new_actions, new_cost])
+
+    return ([], 0)
 
 ######################### Search Planning ##########################
 
