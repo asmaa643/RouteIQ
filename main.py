@@ -73,7 +73,7 @@ def create_planning_problem(commands):
     orders = list(orders_file)
     problems_ = []
     for i in range(len(orders)):
-        create_domain_problem_files(sys.argv[1], data, orders[:i + 1])
+        create_domain_problem_files(commands[1], data, orders[:i + 1])
         domain = "domain" + commands[1]
         problem = "problem" + commands[1]
         problems_.append(PlanningProblem(domain, problem))
@@ -83,7 +83,7 @@ def create_planning_problem(commands):
     return problems_
 
 
-def compare(problems_, probs_):
+def compare(problems_, probs_, routes):
     """
         Compares the performance of A* search and planning.
     """
@@ -105,7 +105,7 @@ def compare(problems_, probs_):
     planning_costs = []
     planning_nodes = []
     planning_results(planning_costs, planning_nodes, planning_times, problems_,
-                     probs_)
+                     probs_, routes)
     ############################### First plot ############################
 
     plt.plot(range(1, 8), planning_times, linestyle='-', color='r',
@@ -179,7 +179,7 @@ def a_star_compare_results(a_star_costs, problems_, searcher):
 
 
 def planning_results(planning_costs, planning_nodes, planning_times, problems_,
-                     probs_):
+                     probs_, routes):
     for i, prob in enumerate(probs_):
         if i == 7: break
         print("Run planning over", i+1, "orders")
@@ -220,7 +220,7 @@ def a_star_results(a_star_costs, a_star_times, problems_, searcher):
         a_star_costs.append(total_cost)
 
 
-def run_num_orders(search, planning, num):
+def run_num_orders(search, planning, num, routes):
     """
         Runs the search and planning algorithms for a specific number of orders.
     """
@@ -243,10 +243,10 @@ def run_num_orders(search, planning, num):
     plan = a_star_search_planning(planning_problem, max_level)
     end_time = time.time()
     elapsed_time = (end_time - start_time)
-    check_plan(elapsed_time, plan, total_cost)
+    check_plan(elapsed_time, plan, total_cost, routes)
 
 
-def check_plan(elapsed_time, plan, total_cost):
+def check_plan(elapsed_time, plan, total_cost, routes):
     if plan is not None:
         plan_ = "#"
         total = 0
@@ -283,20 +283,20 @@ def check_argv(argv):
         exit(1)
 
 
-def user_problem():
+def user_problem(commands, num=0):
     input("Click enter to see the MAP!'\n Close it, then write your orders! ")
     show_map()
     user_orders = open("user_orders.txt", 'w')
     # Prompt the user for input after the image is closed
     print("Write your list, one another one. When done write done!")
-    get_inputs(user_orders)
+    get_inputs(user_orders, num)
     user_orders.close()
     problems_, routes_ = create_A_search_problems(
-        [0, sys.argv[1], sys.argv[2], "user_orders.txt"])
+        [0, commands[1], commands[2], "user_orders.txt"])
     probs_ = create_planning_problem(
-        [0, sys.argv[1], sys.argv[2], "user_orders.txt"])
+        [0, commands[1], commands[2], "user_orders.txt"])
     if len(problems_) > 0:
-        run_num_orders(problems_, probs_, 0)
+        run_num_orders(problems_, probs_, 0, routes_)
     else:
         print("No orders were entered.")
 
@@ -313,10 +313,15 @@ def show_map():
         block=True)  # Ensures the window remains open until manually closed
 
 
-def get_inputs(user_orders):
+def get_inputs(user_orders, num):
+    orders_list = []
+    lst = True
+    if num > 0:
+        lst = False
     user_input = input(
         "Please enter your first order (letter-number), then click ENTER: ")
-    while user_input != "done":
+    while num > 0 or (lst and user_input != "done"):
+        num -= 1
         if '-' in user_input and user_input.count('-') == 1 and user_input[
             1] == '-':
             src, dest = user_input.split('-')
@@ -324,16 +329,84 @@ def get_inputs(user_orders):
                 print("Wrong format.")
                 user_input = input(
                     "Please enter your order(letter-number), then click ENTER: ")
+                num += 1
                 continue
         else:
             print("Wrong format.")
             user_input = input(
                 "Please enter your order(letter-number), then click ENTER: ")
+            num += 1
+            continue
+        if user_input not in orders_list:
+            user_orders.write(user_input + '\n')
+            orders_list.append(user_input)
+            if num > 0 or lst:
+                user_input = input(
+                    "Please enter your order(letter-number), then click ENTER: ")
+
+        else:
+            user_input = input(
+                "You entered this order, another order then click ENTER: ")
+            num += 1
             continue
 
-        user_orders.write(user_input + '\n')
-        user_input = input(
-            "Please enter your order(letter-number), then click ENTER: ")
+
+def main():
+    """
+    Processes the command used to run the game from the command line.
+    """
+    from optparse import OptionParser
+    usage_str = """
+    USAGE:      python main.py <options>
+    EXAMPLES:  
+    """
+    parser = OptionParser(usage_str)
+
+    parser.add_option('-m', '--map', dest='map_file',
+                      help='the map file to read from', default='map.txt')
+    parser.add_option('-o', '--orders', dest='orders_file',
+                      help='the orders file to read from', default='orders.txt')
+    parser.add_option('-a', '--air', dest='air_distances_file',
+                      help='the air distances file to read from',
+                      default='air_distances.csv')
+
+    parser.add_option('-n', '--ordersNum', dest='num',
+                      type='int', nargs=1, help='the number of default orders.', default=-1)
+
+    parser.add_option('-p', '--search-choice', dest='search_choice',
+                      metavar='FUNC', help='search solution choice to use.',
+                      type='choice',
+                      choices=['a_star', 'planning'], default='a_star')
+
+    parser.add_option('-u', '--user', dest='user',type='int',
+                      help='run the program in user input mode', default=0)
+
+    parser.add_option('-r', '--results', dest='results',type='int',
+                      help='run the results code', default=0)
+
+
+    options, _ = parser.parse_args()
+    if options.num == -1 and options.user == 0 and options.results == 0:
+        raise Exception("You didn't enter any choice!")
+    elif (options.num > -1 or options.user == 1) and options.results == 1:
+        raise Exception("Results runs alone!")
+    commands = [0, options.map_file, options.air_distances_file, options.orders_file]
+    problems, routes = create_A_search_problems(commands)
+    probs = create_planning_problem(commands)
+
+    if options.user == 1 and options.num == -1:
+        user_problem(commands)
+    elif options.user == 1 and options.num > -1:
+        user_problem(commands, options.num)
+    elif options.user == 0 and options.num != -1:
+        if options.num > 10 or options.num < 1:
+            print("Usage: ordersNum runs with less than 11 orders.")
+            exit(1)
+        run_num_orders(problems, probs, options.num, routes)
+    elif options.results == 1:
+        compare(problems, probs, routes)
+    else:
+        raise Exception('unrecognized options')
 
 
 if __name__ == '__main__':
@@ -347,17 +420,5 @@ if __name__ == '__main__':
     #    from 1 to *     Show overall results    use the program
 
     ############################### A* Search ############################
-    check_argv(sys.argv)
-    problems, routes = create_A_search_problems(sys.argv)
-    probs = create_planning_problem(sys.argv)
-    if sys.argv[4] == "results":
-        compare(problems, probs)
-
-    if sys.argv[4].split("=")[0] == "ordersNum":
-        if int(sys.argv[4].split("=")[1]) > 10 or int(sys.argv[4].split("=")[1]) < 1:
-            print("Usage: ordersNum runs with less than 11 orders.")
-            exit(1)
-        run_num_orders(problems, probs, int(sys.argv[4].split("=")[1]))
-    if sys.argv[4] == "use":
-        user_problem()
+    main()
 
