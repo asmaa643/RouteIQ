@@ -2,10 +2,11 @@ import csv
 import sys
 import time
 
+import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
 
-from planning_problem import max_level, PlanningProblem
+from planning_problem import max_level, PlanningProblem, level_sum, null_heuristic
 import preprocess_search
 from preprocess_planning import create_domain_problem_files
 from search import *
@@ -22,7 +23,9 @@ and minimum spanning tree calculations.
 
 SOURCES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 DESTS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
-
+n_groups = 8
+index = np.arange(n_groups)
+bar_width = 0.15
 
 def show_path(path):
     """
@@ -93,63 +96,100 @@ def compare(problems_, probs_, routes):
     a_star_costs = []
     a_star_results(a_star_costs, a_star_times, problems_, searcher)
     plt.figure(figsize=(10, 6))
-    plt.plot(range(1, 9), a_star_times, linestyle='-', color='b',
+    plt.bar(index, a_star_times, bar_width,color='b',
              label='A* Search')
     plt.xlabel('Orders number')
     plt.ylabel('Time (seconds) taken to find a solution')
     plt.title('Time taken for code execution across different orders numbers')
-    plt.grid(True)
 
-    ############################### Planning ############################
-    planning_times = []
-    planning_costs = []
-    planning_nodes = []
-    planning_results(planning_costs, planning_nodes, planning_times, problems_,
-                     probs_, routes)
+
+    ############################### Planning-max ############################
+    planning_times_max = []
+    planning_costs_max = []
+    planning_nodes_max = []
+    planning_results(planning_costs_max, planning_nodes_max, planning_times_max,
+                     probs_, routes, max_level, True)
+    planning_times_max = planning_times_max + [0] * (
+                n_groups - len(planning_times_max))
+    planning_costs_max = planning_costs_max + [0] * (
+                n_groups - len(planning_costs_max))
+    planning_nodes_max = planning_nodes_max + [0] * (
+                n_groups - len(planning_nodes_max))
+
+    ############################### Planning-levelSum ########################
+    planning_times_level = []
+    planning_costs_level = []
+    planning_nodes_level = []
+    planning_results(planning_costs_level, planning_nodes_level,
+                     planning_times_level,
+                     probs_, routes, level_sum, False)
+    ############################### Planning-zero ############################
+    planning_times_zero = []
+    planning_costs_zero = []
+    planning_nodes_zero = []
+    planning_results(planning_costs_zero, planning_nodes_zero,
+                     planning_times_zero,
+                     probs_, routes, null_heuristic, False)
     ############################### First plot ############################
 
-    plt.plot(range(1, 8), planning_times, linestyle='-', color='r',
-             label='Planning')
+    plt.bar(index+bar_width, planning_times_max,bar_width, color='r',
+             label='maxPlanning')
+    plt.bar(index + bar_width*2, planning_times_level, bar_width, color='c',
+            label='levelSumPlanning')
+    plt.bar(index + bar_width*3, planning_times_zero, bar_width, color='m',
+            label='zeroPlanning')
     # plt.show()
-    plt.legend(loc='upper center')
+    plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
+    plt.legend()
     plt.savefig("a_star_vs_planning_time.png", format='png', bbox_inches='tight')
     plt.show()
     ############################### Second plot ############################
 
-    a_star_planning_costs(a_star_costs, planning_costs)
+    a_star_planning_costs_max(a_star_costs, planning_costs_max, planning_costs_level, planning_costs_zero)
 
     print("Comparing A* star and planning: Done.")
     ############################### Third plot ############################
-    planning_plot(planning_nodes)
+    planning_plot(planning_nodes_max, planning_nodes_level, planning_nodes_zero)
     print("Planning results: Done.")
     ############################ Comparing A* ###############################
     a_star_compare_results(a_star_costs, problems_, searcher)
 
 
-def planning_plot(planning_nodes):
+def planning_plot(planning_nodes_max, planning_nodes_level, planning_nodes_zero):
     plt.figure(figsize=(10, 6))
     plt.xlabel('Orders number')
     plt.ylabel("Expanded nodes")
     plt.title("Expanded nodes in planning across different orders numbers")
-    plt.grid(True)
-    plt.plot(range(1, 8), planning_nodes, linestyle='-', color='r',
-             label='expanded nodes')
-    plt.savefig("planning_nodes.png", format='png', bbox_inches='tight')
+
+    plt.bar(index, planning_nodes_max,bar_width, color='r',
+             label='maxPlanning')
+    plt.bar(index + bar_width, planning_nodes_level, bar_width, color='c',
+            label='levelSumPlanning')
+    plt.bar(index + bar_width * 2, planning_nodes_zero, bar_width, color='m',
+            label='zeroPlanning')
+    plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
+    plt.legend()
+    plt.savefig("planning_nodes_max.png", format='png', bbox_inches='tight')
     plt.show()
 
 
-def a_star_planning_costs(a_star_costs, planning_costs):
+def a_star_planning_costs_max(a_star_costs, planning_max, planning_level, planning_zero):
     plt.figure(figsize=(10, 6))
-    plt.plot(range(1, 9), a_star_costs, linestyle='-', color='b',
+    plt.bar(index, a_star_costs,bar_width, color='b',
              label='A* Search')
     plt.xlabel('Orders number')
     plt.ylabel("Solution's cost")
     plt.title("Solutions' Costs across different orders numbers")
-    plt.grid(True)
-    plt.plot(range(1, 8), planning_costs, linestyle='-', color='r',
-             label='Planning')
+
+    plt.bar(index+bar_width, planning_max, bar_width, color='r',
+            label='maxPlanning')
+    plt.bar(index + bar_width*2, planning_level, bar_width, color='c',
+            label='levelSumPlanning')
+    plt.bar(index + bar_width * 3, planning_zero, bar_width, color='m',
+            label='zeroPlanning')
     # plt.show()
-    plt.legend(loc='upper center')
+    plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
+    plt.legend()
     plt.savefig("a_star_vs_planning_cost.png", format='png',
                 bbox_inches='tight')
     plt.show()
@@ -167,27 +207,28 @@ def a_star_compare_results(a_star_costs, problems_, searcher):
     plt.xlabel('Orders number')
     plt.ylabel("Heuristic costs")
     plt.title("A* Search heuristics costs")
-    plt.grid(True)
-    plt.plot(range(1, 9), mst_costs, linestyle='-', color='g',
+
+    plt.bar(index, mst_costs,bar_width, color='g',
              label='mst')
-    plt.plot(range(1, 9), a_star_costs, linestyle='--', color='b',
+    plt.bar(index+bar_width, a_star_costs,bar_width, color='b',
              label='max')
-    plt.legend(loc='upper center')
+    plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
+    plt.legend()
     plt.savefig("max_vs_mst.png", format='png',
                 bbox_inches='tight')
     plt.show()
 
 
-def planning_results(planning_costs, planning_nodes, planning_times, problems_,
-                     probs_, routes):
+def planning_results(planning_costs, planning_nodes, planning_times,
+                     probs_, routes, func, max_):
     for i, prob in enumerate(probs_):
-        if i == 7: break
+        if i == 8 or (max_ and i == 6): break
         print("Run planning over", i+1, "orders")
 
         # print([(order.source, order.destination) for order in
         #        problems_[i].orders])
         start_time = time.time()
-        plan = a_star_search_planning(prob, max_level)
+        plan = a_star_search_planning(prob, func)
         end_time = time.time()
         elapsed_time = (end_time - start_time)
         planning_times.append(elapsed_time)
@@ -267,20 +308,6 @@ def check_plan(elapsed_time, plan, total_cost, routes):
     else:
         print("Could not find a plan in %.2f seconds" % elapsed_time)
 
-
-def check_argv(argv):
-    if len(argv) != 5:
-        print("Can't run the Code. Run it using: "
-              "map.txt air_distances.csv orders.txt (ordersNum=*)/(results)/(use)")
-        exit(1)
-    if argv[1] != 'map.txt' or argv[2] != 'air_distances.csv' or argv[3] != 'orders.txt':
-        print("Can't run the Code. Run it using: "
-              "map.txt air_distances.csv orders.txt (ordersNum=*)/(results)/(use)")
-        exit(1)
-    if argv[4] != 'use' and argv[4] != 'results' and 'ordersNum=' not in argv[4]:
-        print("Can't run the Code. Run it using: "
-              "map.txt air_distances.csv orders.txt (ordersNum=*)/(results)/(use)")
-        exit(1)
 
 
 def user_problem(commands, num=0):
