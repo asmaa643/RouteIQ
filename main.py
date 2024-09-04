@@ -95,12 +95,12 @@ def compare(problems_, probs_, routes):
     a_star_times = []
     a_star_costs = []
     a_star_results(a_star_costs, a_star_times, problems_, searcher)
-    plt.figure(figsize=(10, 6))
-    plt.bar(index, a_star_times, bar_width,color='b',
-             label='A* Search')
-    plt.xlabel('Orders number')
-    plt.ylabel('Time (seconds) taken to find a solution')
-    plt.title('Time taken for code execution across different orders numbers')
+    # plt.figure(figsize=(10, 6))
+    # plt.bar(index, a_star_times, bar_width,color='b',
+    #          label='A* Search')
+    # plt.xlabel('Orders number')
+    # plt.ylabel('Time (seconds) taken to find a solution')
+    # plt.title('Time taken for code execution across different orders numbers')
 
     ############################### BFS search ############################
     bfs_times = []
@@ -119,8 +119,8 @@ def compare(problems_, probs_, routes):
         elapsed_time = (end_time - start_time)
         bfs_times.append(elapsed_time)
         bfs_costs.append(cost)
-    plt.bar(index + bar_width, bfs_times, bar_width, color='lime',
-            label='BFS')
+    # plt.bar(index + bar_width, bfs_times, bar_width, color='lime',
+    #         label='BFS')
 
     ############################### DFS search ############################
     dfs_times = []
@@ -139,9 +139,9 @@ def compare(problems_, probs_, routes):
         elapsed_time = (end_time - start_time)
         dfs_times.append(elapsed_time)
         dfs_costs.append(cost)
-    print(dfs_times)
-    plt.bar(index+bar_width*2, dfs_times, bar_width, color='orange',
-            label='DFS')
+    # print(dfs_times)
+    # plt.bar(index+bar_width*2, dfs_times, bar_width, color='orange',
+    #         label='DFS')
 
 
 
@@ -174,22 +174,23 @@ def compare(problems_, probs_, routes):
                      probs_, routes, null_heuristic, False)
     ############################### First plot ############################
 
-    plt.bar(index+bar_width*3, planning_times_max,bar_width, color='r',
-             label='maxPlanning')
-    plt.bar(index + bar_width*4, planning_times_level, bar_width, color='c',
-            label='levelSumPlanning')
-    plt.bar(index + bar_width*5, planning_times_zero, bar_width, color='m',
-            label='zeroPlanning')
+    # plt.bar(index+bar_width*3, planning_times_max,bar_width, color='r',
+    #          label='maxPlanning')
+    # plt.bar(index + bar_width*4, planning_times_level, bar_width, color='c',
+    #         label='levelSumPlanning')
+    # plt.bar(index + bar_width*5, planning_times_zero, bar_width, color='m',
+    #         label='zeroPlanning')
+    # # plt.show()
+    # plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
+    # plt.legend()
+    # plt.savefig("time.png", format='png', bbox_inches='tight')
     # plt.show()
-    plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
-    plt.legend()
-    plt.savefig("time.png", format='png', bbox_inches='tight')
-    plt.show()
+    a_star_planning(a_star_times, planning_times_max, planning_times_level, planning_times_zero, dfs_times, bfs_times, "times.png")
     print("Comparing Runtime: Done.")
 
     ############################### Second plot ############################
 
-    a_star_planning_costs_max(a_star_costs, planning_costs_max, planning_costs_level, planning_costs_zero, dfs_costs, bfs_costs)
+    a_star_planning(a_star_costs, planning_costs_max, planning_costs_level, planning_costs_zero, dfs_costs, bfs_costs, "costs.png")
 
     print("Comparing costs: Done.")
     ############################### Third plot ############################
@@ -217,16 +218,16 @@ def planning_plot(planning_nodes_max, planning_nodes_level, planning_nodes_zero)
     plt.show()
 
 
-def a_star_planning_costs_max(a_star_costs, planning_max, planning_level, planning_zero, dfs_costs, bfs_costs):
+def a_star_planning(a_star, planning_max, planning_level, planning_zero, dfs, bfs, graph_name):
     plt.figure(figsize=(10, 6))
-    plt.bar(index, a_star_costs,bar_width, color='b',
+    plt.bar(index, a_star,bar_width, color='b',
              label='A* Search')
     plt.xlabel('Orders number')
-    plt.ylabel("Solution's cost")
-    plt.title("Solutions' Costs across different orders numbers")
-    plt.bar(index + bar_width, bfs_costs, bar_width, color='lime',
+    plt.ylabel("Solution's "+graph_name)
+    plt.title("Solutions' "+ graph_name+" across different orders numbers")
+    plt.bar(index + bar_width, bfs, bar_width, color='lime',
             label='BFS')
-    plt.bar(index + bar_width*2, dfs_costs, bar_width, color='orange',
+    plt.bar(index + bar_width*2, dfs, bar_width, color='orange',
             label='DFS')
     plt.bar(index+bar_width*3, planning_max, bar_width, color='r',
             label='maxPlanning')
@@ -237,7 +238,7 @@ def a_star_planning_costs_max(a_star_costs, planning_max, planning_level, planni
     # plt.show()
     plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
     plt.legend()
-    plt.savefig("a_star_vs_planning_cost.png", format='png',
+    plt.savefig(graph_name, format='png',
                 bbox_inches='tight')
     plt.show()
 
@@ -276,7 +277,7 @@ def a_star_compare_results(a_star_costs, problems_, searcher):
 def planning_results(planning_costs, planning_nodes, planning_times,
                      probs_, routes, func, max_):
     for i, prob in enumerate(probs_):
-        if i == 8 or (max_ and i == 6): break
+        if i == 8 or (max_ and i == 7): break
         print("Run planning over", i+1, "orders")
 
         # print([(order.source, order.destination) for order in
