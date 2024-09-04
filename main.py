@@ -25,7 +25,7 @@ SOURCES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 DESTS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 n_groups = 8
 index = np.arange(n_groups)
-bar_width = 0.10
+bar_width = 0.1
 
 def show_path(path):
     """
@@ -94,7 +94,9 @@ def compare(problems_, probs_, routes):
     searcher = AStarSearch()
     a_star_times = []
     a_star_costs = []
-    a_star_results(a_star_costs, a_star_times, problems_, searcher)
+    a_star_nodes = []
+    a_star_results(a_star_costs, a_star_times, problems_, searcher, a_star_nodes)
+    print(a_star_nodes)
     # plt.figure(figsize=(10, 6))
     # plt.bar(index, a_star_times, bar_width,color='b',
     #          label='A* Search')
@@ -105,6 +107,7 @@ def compare(problems_, probs_, routes):
     ############################### BFS search ############################
     bfs_times = []
     bfs_costs = []
+    bfs_nodes=[]
     for i, problem in enumerate(problems_):
         if i == 8: break
         print("Run bfs over", i + 1, "orders")
@@ -119,12 +122,16 @@ def compare(problems_, probs_, routes):
         elapsed_time = (end_time - start_time)
         bfs_times.append(elapsed_time)
         bfs_costs.append(cost)
+        bfs_nodes.append(problem.expanded)
+    print(bfs_nodes)
+
     # plt.bar(index + bar_width, bfs_times, bar_width, color='lime',
     #         label='BFS')
 
     ############################### DFS search ############################
     dfs_times = []
     dfs_costs = []
+    dfs_nodes=[]
     for i, problem in enumerate(problems_):
         if i == 8: break
         print("Run dfs over", i+1, "orders")
@@ -139,6 +146,7 @@ def compare(problems_, probs_, routes):
         elapsed_time = (end_time - start_time)
         dfs_times.append(elapsed_time)
         dfs_costs.append(cost)
+        dfs_nodes.append(problem.expanded)
     # print(dfs_times)
     # plt.bar(index+bar_width*2, dfs_times, bar_width, color='orange',
     #         label='DFS')
@@ -185,88 +193,144 @@ def compare(problems_, probs_, routes):
     # plt.legend()
     # plt.savefig("time.png", format='png', bbox_inches='tight')
     # plt.show()
-    a_star_planning(a_star_times, planning_times_max, planning_times_level, planning_times_zero, dfs_times, bfs_times, "times.png")
-    print("Comparing Runtime: Done.")
+
 
     ############################### Second plot ############################
 
-    a_star_planning(a_star_costs, planning_costs_max, planning_costs_level, planning_costs_zero, dfs_costs, bfs_costs, "costs.png")
+
+    ############################### Third plot ############################
+    # planning_plot(planning_nodes_max, planning_nodes_level, planning_nodes_zero)
+    # print("Planning results: Done.")
+    ############################ Comparing A* ###############################
+    mst_nodes = []
+    sum_nodes = []
+    mst_costs = []
+    sum_costs = []
+    mst_times = []
+    sum_times = []
+    a_star_compare_results(a_star_costs, problems_, searcher, mst_costs, sum_costs, mst_nodes, sum_nodes, mst_times, sum_times)
+
+    ######################## Nodes ##########################
+
+    ##############
+    a_star_planning(a_star_times, planning_times_max, planning_times_level, planning_times_zero, dfs_times, bfs_times,mst_times, sum_times, "times")
+    print("Comparing Runtime: Done.")
+    a_star_planning(a_star_costs, planning_costs_max, planning_costs_level,
+                    planning_costs_zero, dfs_costs, bfs_costs,mst_costs, sum_costs, "costs")
 
     print("Comparing costs: Done.")
-    ############################### Third plot ############################
-    planning_plot(planning_nodes_max, planning_nodes_level, planning_nodes_zero)
-    print("Planning results: Done.")
-    ############################ Comparing A* ###############################
-    a_star_compare_results(a_star_costs, problems_, searcher)
 
+    nodesPlot(a_star_nodes[:6], planning_nodes_max[:6], planning_nodes_level[:6], planning_nodes_zero[:6], dfs_nodes[:6], bfs_nodes[:6],mst_nodes[:6], sum_nodes[:6])
 
-def planning_plot(planning_nodes_max, planning_nodes_level, planning_nodes_zero):
     plt.figure(figsize=(10, 6))
     plt.xlabel('Orders number')
-    plt.ylabel("Expanded nodes")
-    plt.title("Expanded nodes in planning across different orders numbers")
-
-    plt.bar(index, planning_nodes_max,bar_width, color='r',
-             label='maxPlanning')
-    plt.bar(index + bar_width, planning_nodes_level, bar_width, color='c',
+    plt.ylabel("Planning costs")
+    plt.title("Planning search heuristics costs")
+    plt.bar(index, planning_costs_max, 0.2, color='r',
+            label='maxPlanning')
+    plt.bar(index + 0.2, planning_costs_level, 0.2, color='c',
             label='levelSumPlanning')
-    plt.bar(index + bar_width * 2, planning_nodes_zero, bar_width, color='m',
+    plt.bar(index + 0.2 * 2, planning_costs_zero, 0.2, color='m',
             label='zeroPlanning')
-    plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
+
+    plt.xticks(index + 0.2*2 / 2, range(1, n_groups + 1))
     plt.legend()
-    plt.savefig("planning_nodes.png", format='png', bbox_inches='tight')
+    plt.savefig("planning_costs.png", format='png',
+                bbox_inches='tight')
+    plt.show()
+    print("Comparing planning heuristics: Done.")
+
+
+def nodesPlot(a_star, planning_max, planning_level, planning_zero, dfs, bfs,mst, sum_):
+    index_ = np.arange(6)
+    plt.figure(figsize=(10, 6))
+    plt.bar(index_, a_star, bar_width, color='b',
+            label='A* MAX')
+    plt.xlabel('Orders number')
+    plt.ylabel("Solution's expanded_nodes")
+    plt.title("Solutions' expanded_nodes across different orders numbers")
+    plt.bar(index_ + bar_width, mst, bar_width, color='g',
+            label='A* MST')
+    plt.bar(index_ + bar_width * 2, sum_, bar_width, color='silver',
+            label='A* SUM')
+    plt.bar(index_ + bar_width * 3, planning_max, bar_width, color='r',
+            label='maxPlanning')
+    plt.bar(index_ + bar_width * 4, planning_level, bar_width, color='c',
+            label='levelSumPlanning')
+    plt.bar(index_ + bar_width * 5, planning_zero, bar_width, color='m',
+            label='zeroPlanning')
+    plt.bar(index_ + bar_width * 6, bfs, bar_width, color='lime',
+            label='BFS')
+    plt.bar(index_ + bar_width * 7, dfs, bar_width, color='orange',
+            label='DFS')
+    # plt.show()
+    plt.xticks(index_ + bar_width*7 / 2, range(1, 6 + 1))
+    plt.legend()
+    plt.savefig("expanded_nodes.png", format='png',
+                bbox_inches='tight')
     plt.show()
 
-
-def a_star_planning(a_star, planning_max, planning_level, planning_zero, dfs, bfs, graph_name):
+def a_star_planning(a_star, planning_max, planning_level, planning_zero, dfs, bfs,mst, sum_, graph_name):
     plt.figure(figsize=(10, 6))
     plt.bar(index, a_star,bar_width, color='b',
-             label='A* Search')
+             label='A* MAX')
     plt.xlabel('Orders number')
     plt.ylabel("Solution's "+graph_name)
     plt.title("Solutions' "+ graph_name+" across different orders numbers")
-    plt.bar(index + bar_width, bfs, bar_width, color='lime',
-            label='BFS')
-    plt.bar(index + bar_width*2, dfs, bar_width, color='orange',
-            label='DFS')
+    plt.bar(index + bar_width, mst, bar_width, color='g',
+            label='A* MST')
+    plt.bar(index + bar_width*2, sum_, bar_width, color='silver',
+            label='A* SUM')
     plt.bar(index+bar_width*3, planning_max, bar_width, color='r',
             label='maxPlanning')
     plt.bar(index + bar_width*4, planning_level, bar_width, color='c',
             label='levelSumPlanning')
     plt.bar(index + bar_width * 5, planning_zero, bar_width, color='m',
             label='zeroPlanning')
+    plt.bar(index + bar_width * 6, bfs, bar_width, color='lime',
+            label='BFS')
+    plt.bar(index + bar_width * 7, dfs, bar_width, color='orange',
+            label='DFS')
     # plt.show()
-    plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
+    plt.xticks(index + bar_width*7 / 2, range(1, n_groups + 1))
     plt.legend()
-    plt.savefig(graph_name, format='png',
+    plt.savefig(graph_name+".png", format='png',
                 bbox_inches='tight')
     plt.show()
 
 
-def a_star_compare_results(a_star_costs, problems_, searcher):
-    mst_costs = []
-    sum_costs = []
+def a_star_compare_results(a_star_costs, problems_, searcher,mst_costs, sum_costs,  mst_nodes, sum_nodes, mst_times, sum_times):
     for i, problem in enumerate(problems_):
         if i == 8: break
         print("Run mst over", i+1)
-        optimal_path, mst_cost = searcher.a_star(problem,heuristic=mstAirDistHeuristic)
+        start_time = time.time()
+        path, mst_cost = searcher.a_star(problem,heuristic=mstAirDistHeuristic)
+        end_time = time.time()
+        elapsed_time = (end_time - start_time)
+        mst_times.append(elapsed_time)
         mst_costs.append(mst_cost)
+        mst_nodes.append(problem.expanded)
         print("Run sum over", i + 1)
-        optimal_path, sum_cost = searcher.a_star(problem,heuristic=sumAirDistHeuristic)
+        start_time = time.time()
+        path, sum_cost = searcher.a_star(problem,heuristic=sumAirDistHeuristic)
+        end_time = time.time()
+        elapsed_time = (end_time - start_time)
+        sum_times.append(elapsed_time)
         sum_costs.append(sum_cost)
+        sum_nodes.append(problem.expanded)
 
     plt.figure(figsize=(10, 6))
     plt.xlabel('Orders number')
     plt.ylabel("Heuristic costs")
     plt.title("A* Search heuristics costs")
-
-    plt.bar(index, mst_costs,bar_width, color='g',
-             label='mst')
-    plt.bar(index+bar_width, sum_costs, bar_width, color='teal',
-            label='sum')
-    plt.bar(index+bar_width*2, a_star_costs,bar_width, color='b',
+    plt.bar(index, a_star_costs,0.2, color='b',
              label='max')
-    plt.xticks(index + bar_width / 2, range(1, n_groups + 1))
+    plt.bar(index+0.2, mst_costs,0.2, color='g',
+             label='mst')
+    plt.bar(index+0.2*2, sum_costs, 0.2, color='silver',
+            label='sum')
+
+    plt.xticks(index + 0.2*2 / 2, range(1, n_groups + 1))
     plt.legend()
     plt.savefig("max_vs_mst_vs_sum.png", format='png',
                 bbox_inches='tight')
@@ -298,7 +362,7 @@ def planning_results(planning_costs, planning_nodes, planning_times,
         planning_nodes.append(prob.expanded)
 
 
-def a_star_results(a_star_costs, a_star_times, problems_, searcher):
+def a_star_results(a_star_costs, a_star_times, problems_, searcher, a_star_nodes):
     for i, problem in enumerate(problems_):
         if i == 8: break
         print("Run a_star over", i+1, "orders")
@@ -314,6 +378,7 @@ def a_star_results(a_star_costs, a_star_times, problems_, searcher):
         elapsed_time = (end_time - start_time)
         a_star_times.append(elapsed_time)
         a_star_costs.append(total_cost)
+        a_star_nodes.append(problem.expanded)
 
 
 def run_num_orders(search, planning, num, routes):
