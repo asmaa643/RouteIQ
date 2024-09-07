@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
 
-from delivery_problem import DeliveryProblem
+from delivery_problem import DeliveryProblem, DeliveryConstrainedProblem
 from planning_problem import max_level, PlanningProblem, level_sum, \
     null_heuristic
 import preprocess_search
@@ -68,6 +68,36 @@ def create_A_search_problems(commands):
         problems_.append(DeliveryProblem(start_state, orders[:i + 1], routes_))
     return problems_, routes_
 
+def create_constraint_A_search_problems(commands):
+    """
+        Prepares the A* search problems based on input commands.
+    """
+    map_file = open(commands[1], "r")
+    data = list(map_file)
+    map_routes = preprocess_search.get_map_routes(data)
+    map_file.close()
+    orders_file = open(commands[3], "r")
+    orders = preprocess_search.get_orders_list(orders_file)
+    orders_file.close()
+
+    file_path = commands[2]  # Update with your file path
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        data = list(reader)
+    points = data[0][1:]  # The header row, without the first column
+    matrix = [' '.join(row[1:]) for row in data[1:]]
+    routes_ = preprocess_search.add_air_distances(map_routes, points, matrix)
+
+    problems_ = []
+    for i in range(len(orders)):
+        problems_.append([])
+        start_state = (
+            '#', [False for _ in orders[:i + 1]],
+            [False for _ in orders[:i + 1]])
+        for j in range(8):
+            (problems_[-1]).append(DeliveryConstrainedProblem(start_state, orders[:i + 1], routes_, j+1))
+    return problems_, routes_
+
 
 def create_planning_problem(commands):
     """
@@ -88,6 +118,51 @@ def create_planning_problem(commands):
 
     return problems_
 
+
+def constraint_results(probs_):
+    """
+        Compares the performance of A* search and planning.
+    """
+    ############################### A* search ############################
+    searcher = AStarSearch()
+    a_star_con_times = []
+    a_star_con_costs = []
+    a_star_con_nodes = []
+    for i, problem in enumerate(probs_):
+        if i == 7: break
+        print("Run a_star with constraint over", i + 1, "orders")
+        a_star_con_times.append([])
+        a_star_con_costs.append([])
+        a_star_con_nodes.append([])
+        for j in range(7):
+            start_time = time.time()
+            optimal_path, total_cost = searcher.a_star(problem[j],
+                                                       heuristic=maxPointAirDistHeuristic)
+            end_time = time.time()
+            # Calculate elapsed time in seconds and append to the list
+            elapsed_time = (end_time - start_time)
+            a_star_con_times[-1].append(elapsed_time)
+            a_star_con_costs[-1].append(total_cost)
+            a_star_con_nodes[-1].append(problem[j].expanded)
+
+    plt.figure(figsize=(10, 6))
+    plt.xlabel('Orders number')
+    plt.ylabel("cost")
+    plt.title("Constraint")
+    plot_colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+    index_ = np.arange(7)
+    for j in range(7):
+        to_plot = []
+        for i in range(7):
+            to_plot.append(a_star_con_costs[i][j])
+        plt.bar(index_ + bar_width * j, to_plot, bar_width, color=plot_colors[j],
+                label=("capacity"+str(j+1)))
+
+    plt.xticks(index_ + bar_width * 6 / 2, range(1, 7 + 1))
+    plt.legend()
+    plt.savefig("constrained" + ".png", format='png',
+                bbox_inches='tight')
+    plt.show()
 
 def compare(problems_, probs_, routes):
     """
@@ -495,6 +570,8 @@ def main():
         run_num_orders(problems, probs, options.num, routes)
     elif options.results == 1:
         compare(problems, probs, routes)
+        constraint_probs, _ = create_constraint_A_search_problems(commands)
+        constraint_results(constraint_probs)
     else:
         raise Exception('unrecognized options')
 
