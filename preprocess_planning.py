@@ -1,11 +1,10 @@
-
 def create_domain_problem_files(name, lines, problem_orders):
     """
         Creates domain and problem files based on provided data.
 
     """
-    domain_file = open("domain"+name, 'w')
-    problem_file = open("problem"+name, 'w')
+    domain_file = open("domain" + name, 'w')
+    problem_file = open("problem" + name, 'w')
     map_points = set()
     actions = list()
     pre = list()
@@ -32,16 +31,16 @@ def process_problem(actions, dests, pre, problem_file, problem_orders):
     """
     for line in problem_orders:
         src, dest = line.rstrip('\n').split("-")
-        problem_file.write(" order@" + src+dest)
+        problem_file.write(" order@" + src + dest)
         actions.append(
             "\nName: Pickup_Order_" + dest + "\npre: @" + src + " order@"
-            + src+dest + "\nadd: has_Order_" + src+dest + "\ndelete: order@" + src+dest)
-        dests.append(" deliver_order_" + src+dest)
+            + src + dest + "\nadd: has_Order_" + src + dest + "\ndelete: order@" + src + dest)
+        dests.append(" deliver_order_" + src + dest)
         actions.append(
-            "\nName: Deliver_Order_" + src+dest + "\npre: @" + dest + " has_Order_"
-            + src+dest + "\nadd: deliver_order_" + src+dest + "\ndelete: has_Order_" + src+dest)
+            "\nName: Deliver_Order_" + src + dest + "\npre: @" + dest + " has_Order_"
+            + src + dest + "\nadd: deliver_order_" + src + dest + "\ndelete: has_Order_" + src + dest)
         pre.append(
-            "order@" + src+dest + " has_Order_" + src+dest + " deliver_order_" + src+dest + " ")
+            "order@" + src + dest + " has_Order_" + src + dest + " deliver_order_" + src + dest + " ")
 
 
 def process_domain(actions, lines, map_points):

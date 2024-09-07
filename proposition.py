@@ -1,3 +1,4 @@
+
 class Proposition(object):
     """
     A class for representing propositions.

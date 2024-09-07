@@ -1,6 +1,5 @@
 from util import Pair
 
-
 class PropositionLayer(object):
     """
     A class for an PropositionLayer  in a level of the graph.

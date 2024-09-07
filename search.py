@@ -31,7 +31,7 @@ class DeliveryProblem:
                 if move == order.source and not new_pickup[index]:
                     new_pickup[index] = True
                 elif move == order.destination and new_pickup[index] and not \
-                new_delivered[index]:
+                        new_delivered[index]:
                     new_delivered[index] = True
 
             successors.append(((move, new_pickup, new_delivered),
@@ -99,34 +99,6 @@ class AStarSearch:
         return None, float('inf')
 
 
-def uniform_cost_search(problem):
-    """
-    Performs Uniform Cost Search to find the path with the least total cost.
-    """
-    "*** YOUR CODE HERE ***"
-    visited_nodes = []
-    fringe = util.PriorityQueue()
-    first_state = problem.get_start_state()
-    fringe.push([first_state, [], 0], 0)
-    while not fringe.isEmpty():
-        current_node = fringe.pop()
-        cur_state = current_node[0]
-        cur_actions = current_node[1]
-        if problem.is_goal_state(cur_state):
-            return cur_actions
-        if cur_state in visited_nodes:
-            continue
-        visited_nodes.append(cur_state)
-        children = problem.get_successors(cur_state)
-        for child in children:
-            if child[0] not in visited_nodes:
-                child_action = cur_actions + [child[1]]
-                cost_of_actions = problem.get_cost_of_actions(child_action)
-                fringe.push([child[0],
-                             child_action, cost_of_actions], cost_of_actions)
-    return []
-
-
 def depth_first_search(problem):
     """
     Performs Depth First Search to explore the deepest nodes in the search tree first.
@@ -177,6 +149,7 @@ def depth_first_search(problem):
 
     return ([], 0)  # If no solution found, return an empty path and zero cost
 
+
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
@@ -215,6 +188,7 @@ def breadth_first_search(problem):
                 fringe.push([child_state, new_actions, new_cost])
 
     return ([], 0)
+
 
 ######################### Search Planning ##########################
 

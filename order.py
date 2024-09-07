@@ -11,16 +11,3 @@ class Order:
         """
         self.source = source
         self.destination = destination
-        self.pickup = False
-        self.delivered = False
-
-    def mark_as_pickup(self):
-        """
-         Marks the order as picked up.
-        """
-        self.pickup = True
-    def mark_as_delivered(self):
-        """
-         Marks the order as delivered.
-        """
-        self.delivered = True

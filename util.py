@@ -62,6 +62,7 @@ class Stack:
         """
         return len(self.list) == 0
 
+
 class Queue:
     "A container with a first-in-first-out (FIFO) queuing policy."
 
@@ -82,6 +83,7 @@ class Queue:
     def isEmpty(self):
         "Returns true if the queue is empty"
         return len(self.list) == 0
+
 
 class PriorityQueue:
     """

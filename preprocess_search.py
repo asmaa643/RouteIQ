@@ -27,11 +27,12 @@ def get_map_routes(lines):
                 c_map_routes.add_route(point, n, float(dist))
     return c_map_routes
 
+
 def add_air_distances(air_routes, map_points, air_distances_matrix):
     """
     Adds air distance data to the air_routes object based on provided distance matrix.
     """
-    for p,line in zip(map_points, air_distances_matrix):
+    for p, line in zip(map_points, air_distances_matrix):
         dists = line.split()
         for index, point in enumerate(map_points):
             air_routes.add_air_distance(p, point, float(dists[index]))

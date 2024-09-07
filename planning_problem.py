@@ -122,6 +122,7 @@ def max_level(state, planning_problem):
                 'inf')  # If no changes, return infinity (goal not reachable)
     return level
 
+
 def level_sum(state, planning_problem):
     """
     The heuristic value is the sum of sub-goals level they first appeared.
@@ -129,10 +130,12 @@ def level_sum(state, planning_problem):
     """
     prop_layer_init = PropositionLayer()  # Create a new proposition layer
     for prop in state:
-        prop_layer_init.add_proposition(prop)  # Update the proposition layer with the propositions of the state
+        prop_layer_init.add_proposition(
+            prop)  # Update the proposition layer with the propositions of the state
 
     pg_init = PlanGraphLevel()  # Create a new plan graph level
-    pg_init.set_proposition_layer(prop_layer_init)  # Update the new plan graph level with the proposition layer
+    pg_init.set_proposition_layer(
+        prop_layer_init)  # Update the new plan graph level with the proposition layer
 
     goal_levels = {goal: None for goal in
                    planning_problem.goal}  # Dictionary to track the level of each goal proposition
@@ -160,13 +163,16 @@ def level_sum(state, planning_problem):
         # Expand to the next level
         prev_props = current_props
         pg_next = PlanGraphLevel()  # Create a new next level plan graph
-        pg_next.expand_without_mutex(pg_init)  # Expand without computing mutex relations
+        pg_next.expand_without_mutex(
+            pg_init)  # Expand without computing mutex relations
         pg_init = pg_next  # Move to the next level
         level += 1
 
         # If no changes, return infinity (goal not reachable)
-        if len(pg_init.get_proposition_layer().get_propositions()) == len(prev_props):
+        if len(pg_init.get_proposition_layer().get_propositions()) == len(
+                prev_props):
             return float('inf')
+
 
 def is_fixed(graph, level):
     """
