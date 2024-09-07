@@ -68,6 +68,7 @@ def create_A_search_problems(commands):
         problems_.append(DeliveryProblem(start_state, orders[:i + 1], routes_))
     return problems_, routes_
 
+
 def create_constraint_A_search_problems(commands):
     """
         Prepares the A* search problems based on input commands.
@@ -95,7 +96,9 @@ def create_constraint_A_search_problems(commands):
             '#', [False for _ in orders[:i + 1]],
             [False for _ in orders[:i + 1]])
         for j in range(8):
-            (problems_[-1]).append(DeliveryConstrainedProblem(start_state, orders[:i + 1], routes_, j+1))
+            (problems_[-1]).append(
+                DeliveryConstrainedProblem(start_state, orders[:i + 1],
+                                           routes_, j + 1))
     return problems_, routes_
 
 
@@ -155,14 +158,16 @@ def constraint_results(probs_):
         to_plot = []
         for i in range(7):
             to_plot.append(a_star_con_costs[i][j])
-        plt.bar(index_ + bar_width * j, to_plot, bar_width, color=plot_colors[j],
-                label=("capacity"+str(j+1)))
+        plt.bar(index_ + bar_width * j, to_plot, bar_width,
+                color=plot_colors[j],
+                label=("capacity" + str(j + 1)))
 
     plt.xticks(index_ + bar_width * 6 / 2, range(1, 7 + 1))
     plt.legend()
     plt.savefig("constrained" + ".png", format='png',
                 bbox_inches='tight')
     plt.show()
+
 
 def compare(problems_, probs_, routes):
     """
@@ -398,33 +403,41 @@ def a_star_results(a_star_costs, a_star_times, problems_, searcher,
         a_star_nodes.append(problem.expanded)
 
 
-def run_num_orders(search, planning, num, routes):
+def run_num_orders(search, planning, num, routes, capacity, choice):
     """
         Runs the search and planning algorithms for a specific number of orders.
     """
-    searcher = AStarSearch()
-    search_problem = search[num - 1]
-    print("The orders list is:"),
-    for order in search_problem.orders:
-        print("(", order.source, ",", order.destination, ")")
-    start_time = time.time()
-    optimal_path, total_cost = searcher.a_star(search_problem,
-                                               heuristic=maxPointAirDistHeuristic)
-    end_time = time.time()
-    elapsed_time = (end_time - start_time)
-    print(f"A* found the optimal path with cost", total_cost,
-          "in %.2f seconds" % elapsed_time, "\nBy taking this path:")
-    show_path(optimal_path)
-    print()
-    planning_problem = planning[num - 1]
-    start_time = time.time()
-    plan = a_star_search_planning(planning_problem, max_level)
-    end_time = time.time()
-    elapsed_time = (end_time - start_time)
-    check_plan(elapsed_time, plan, total_cost, routes)
+    if choice == "a_star":
+        searcher = AStarSearch()
+        search_problem = search[num - 1]
+        if capacity != -1:
+            search_problem = DeliveryConstrainedProblem(
+                search_problem.start_state, search_problem.orders,
+                search_problem.map_routes, capacity)
+        print("The orders list is:"),
+        for order in search_problem.orders:
+            print("(", order.source, ",", order.destination, ")")
+        start_time = time.time()
+        optimal_path, total_cost = searcher.a_star(search_problem,
+                                                   heuristic=maxPointAirDistHeuristic)
+        end_time = time.time()
+        elapsed_time = (end_time - start_time)
+        print(f"A* found the optimal path with cost", total_cost,
+              "in %.2f seconds" % elapsed_time, "\nBy taking this path:")
+        show_path(optimal_path)
+    else:
+        planning_problem = planning[num - 1]
+        start_time = time.time()
+        if num > 6:
+            plan = a_star_search_planning(planning_problem, null_heuristic)
+        else:
+            plan = a_star_search_planning(planning_problem, max_level)
+        end_time = time.time()
+        elapsed_time = (end_time - start_time)
+        check_plan(elapsed_time, plan, routes)
 
 
-def check_plan(elapsed_time, plan, total_cost, routes):
+def check_plan(elapsed_time, plan, routes):
     if plan is not None:
         plan_ = "#"
         total = 0
@@ -440,13 +453,11 @@ def check_plan(elapsed_time, plan, total_cost, routes):
                 len(plan), total, elapsed_time))
         print("By following this path:")
         print(plan_)
-        if total == total_cost:
-            print("\nFound the same PATH/ COST")
     else:
         print("Could not find a plan in %.2f seconds" % elapsed_time)
 
 
-def user_problem(commands, num=0):
+def user_problem(commands, capacity, choice, num=0):
     input("Click enter to see the MAP!'\n Close it, then write your orders! ")
     show_map()
     user_orders = open("user_orders.txt", 'w')
@@ -459,7 +470,7 @@ def user_problem(commands, num=0):
     probs_ = create_planning_problem(
         [0, commands[1], commands[2], "user_orders.txt"])
     if len(problems_) > 0:
-        run_num_orders(problems_, probs_, 0, routes_)
+        run_num_orders(problems_, probs_, 0, routes_, capacity, choice)
     else:
         print("No orders were entered.")
 
@@ -525,20 +536,23 @@ def main():
     """
     parser = OptionParser(usage_str)
 
-    parser.add_option('-m', '--map', dest='map_file',
+    parser.add_option('--map', dest='map_file',
                       help='the map file to read from', default='map.txt')
-    parser.add_option('-o', '--orders', dest='orders_file',
+    parser.add_option('--orders', dest='orders_file',
                       help='the orders file to read from',
                       default='orders.txt')
-    parser.add_option('-a', '--air', dest='air_distances_file',
+    parser.add_option('--air', dest='air_distances_file',
                       help='the air distances file to read from',
                       default='air_distances.csv')
 
-    parser.add_option('-n', '--ordersNum', dest='num',
+    parser.add_option('--ordersNum', dest='num',
                       type='int', nargs=1,
                       help='the number of default orders.', default=-1)
+    parser.add_option('--capacity', dest='capacity',
+                      type='int', nargs=1,
+                      help='the capacity of the motorcycle.', default=-1)
 
-    parser.add_option('-p', '--search-choice', dest='search_choice',
+    parser.add_option('--choice', dest='search_choice',
                       metavar='FUNC', help='search solution choice to use.',
                       type='choice',
                       choices=['a_star', 'planning'], default='a_star')
@@ -559,15 +573,23 @@ def main():
     problems, routes = create_A_search_problems(commands)
     probs = create_planning_problem(commands)
 
-    if options.user == 1 and options.num == -1:
-        user_problem(commands)
+    if options.capacity != -1 and options.capacity <= 0:
+        print("Usage: Capacity can't be negative!.")
+        exit(1)
+    elif options.capacity != -1 and options.search_choice == "planning":
+        print("Usage: Capacity is not supported using planning.")
+        exit(1)
+    elif options.user == 1 and options.num == -1:
+        user_problem(commands, options.capacity, options.search_choice)
     elif options.user == 1 and options.num > -1:
-        user_problem(commands, options.num)
+        user_problem(commands, options.capacity, options.search_choice,
+                     options.num)
     elif options.user == 0 and options.num != -1:
         if options.num > 10 or options.num < 1:
             print("Usage: ordersNum runs with less than 11 orders.")
             exit(1)
-        run_num_orders(problems, probs, options.num, routes)
+        run_num_orders(problems, probs, options.num, routes, options.capacity,
+                       options.search_choice)
     elif options.results == 1:
         compare(problems, probs, routes)
         constraint_probs, _ = create_constraint_A_search_problems(commands)
@@ -577,14 +599,4 @@ def main():
 
 
 if __name__ == '__main__':
-    """
-    Run this script with appropriate command-line arguments to specify the input files and desired operations.
-    """
-    ############################## Commands format #######################
-    # 1: map, 2: air distances on map, 3: orders list
-    # 4: (ordersNum=*) / (results) /              (use)
-    #           |            |                      |
-    #    from 1 to *     Show overall results    use the program
-
-    ############################### A* Search ############################
     main()
