@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
 
+from delivery_problem import DeliveryProblem
 from planning_problem import max_level, PlanningProblem, level_sum, \
     null_heuristic
 import preprocess_search
