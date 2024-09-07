@@ -557,10 +557,10 @@ def main():
                       type='choice',
                       choices=['a_star', 'planning'], default='a_star')
 
-    parser.add_option('-u', '--user', dest='user', type='int',
+    parser.add_option('--user', dest='user', type='int',
                       help='run the program in user input mode', default=0)
 
-    parser.add_option('-r', '--results', dest='results', type='int',
+    parser.add_option('--results', dest='results', type='int',
                       help='run the results code', default=0)
 
     options, _ = parser.parse_args()
