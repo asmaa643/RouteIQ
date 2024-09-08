@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
 
-from delivery_problem import DeliveryProblem, DeliveryConstrainedProblem
+from delivery_problem import DeliveryProblem, DeliveryCapacityProblem
 from planning_problem import max_level, PlanningProblem, level_sum, \
     null_heuristic
 import preprocess_search
@@ -69,7 +69,7 @@ def create_A_search_problems(commands):
     return problems_, routes_
 
 
-def create_constraint_A_search_problems(commands):
+def create_capacity_A_search_problems(commands):
     """
         Prepares the A* search problems based on input commands.
     """
@@ -97,7 +97,7 @@ def create_constraint_A_search_problems(commands):
             [False for _ in orders[:i + 1]])
         for j in range(8):
             (problems_[-1]).append(
-                DeliveryConstrainedProblem(start_state, orders[:i + 1],
+                DeliveryCapacityProblem(start_state, orders[:i + 1],
                                            routes_, j + 1))
     return problems_, routes_
 
@@ -122,7 +122,7 @@ def create_planning_problem(commands):
     return problems_
 
 
-def constraint_results(probs_):
+def capacity_results(probs_):
     """
         Compares the performance of A* search and planning.
     """
@@ -133,7 +133,7 @@ def constraint_results(probs_):
     a_star_con_nodes = []
     for i, problem in enumerate(probs_):
         if i == 7: break
-        print("Run a_star with constraint over", i + 1, "orders")
+        print("Run a_star with capacity over", i + 1, "orders")
         a_star_con_times.append([])
         a_star_con_costs.append([])
         a_star_con_nodes.append([])
@@ -151,7 +151,7 @@ def constraint_results(probs_):
     plt.figure(figsize=(10, 6))
     plt.xlabel('Orders number')
     plt.ylabel("cost")
-    plt.title("Constraint")
+    plt.title("capacity")
     plot_colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
     index_ = np.arange(7)
     for j in range(7):
@@ -414,7 +414,7 @@ def a_star_plan(search, planning, num, routes, capacity):
     searcher = AStarSearch()
     search_problem = search[num - 1]
     if capacity != -1:
-        search_problem = DeliveryConstrainedProblem(
+        search_problem = DeliveryCapacityProblem(
             search_problem.start_state, search_problem.orders,
             search_problem.map_routes, capacity)
     print("The orders list is:"),
@@ -568,9 +568,11 @@ def main():
 
     options, _ = parser.parse_args()
     if options.num == -1 and options.user == 0 and options.results == 0:
-        raise Exception("You didn't enter any choice!")
+        print("You didn't enter any choice!")
+        exit(1)
     elif (options.num > -1 or options.user == 1) and options.results == 1:
-        raise Exception("Results runs alone!")
+        print("Results runs alone!")
+        exit(1)
     commands = [0, options.map_file, options.air_distances_file,
                 options.orders_file]
     problems, routes = create_A_search_problems(commands)
@@ -597,8 +599,8 @@ def main():
                        choices[options.search_choice])
     elif options.results == 1:
         compare(problems, probs, routes)
-        constraint_probs, _ = create_constraint_A_search_problems(commands)
-        constraint_results(constraint_probs)
+        capacity_probs, _ = create_capacity_A_search_problems(commands)
+        capacity_results(capacity_probs)
     else:
         raise Exception('unrecognized options')
 

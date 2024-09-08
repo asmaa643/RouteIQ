@@ -45,7 +45,7 @@ class DeliveryProblem:
                                                        actions[i][1])
         return total_cost
 
-class DeliveryConstrainedProblem(DeliveryProblem):
+class DeliveryCapacityProblem(DeliveryProblem):
     def __init__(self, start_state, orders, map_routes, deliveriesNum):
         super().__init__(start_state, orders,map_routes)
         self.deliveriesNum = deliveriesNum
