@@ -90,9 +90,9 @@ def create_planning_problem(commands):
     orders = list(orders_file)
     problems_ = []
     for i in range(len(orders)):
-        create_domain_problem_files(commands[1], data, orders[:i + 1])
-        domain = DOMAIN + commands[1]
-        problem = PROBLEM + commands[1]
+        create_domain_problem_files(commands[2], data, orders[:i + 1])
+        domain = DOMAIN + commands[2]
+        problem = PROBLEM + commands[2]
         problems_.append(PlanningProblem(domain, problem))
     map_file.close()
     orders_file.close()
