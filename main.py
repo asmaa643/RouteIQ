@@ -407,35 +407,38 @@ def run_num_orders(search, planning, num, routes, capacity, choice):
     """
         Runs the search and planning algorithms for a specific number of orders.
     """
-    if choice == "a_star":
-        searcher = AStarSearch()
-        search_problem = search[num - 1]
-        if capacity != -1:
-            search_problem = DeliveryConstrainedProblem(
-                search_problem.start_state, search_problem.orders,
-                search_problem.map_routes, capacity)
-        print("The orders list is:"),
-        for order in search_problem.orders:
-            print("(", order.source, ",", order.destination, ")")
-        start_time = time.time()
-        optimal_path, total_cost = searcher.a_star(search_problem,
-                                                   heuristic=maxPointAirDistHeuristic)
-        end_time = time.time()
-        elapsed_time = (end_time - start_time)
-        print(f"A* found the optimal path with cost", total_cost,
-              "in %.2f seconds" % elapsed_time, "\nBy taking this path:")
-        show_path(optimal_path)
-    else:
-        planning_problem = planning[num - 1]
-        start_time = time.time()
-        if num > 6:
-            plan = a_star_search_planning(planning_problem, null_heuristic)
-        else:
-            plan = a_star_search_planning(planning_problem, max_level)
-        end_time = time.time()
-        elapsed_time = (end_time - start_time)
-        check_plan(elapsed_time, plan, routes)
+    choice(search, planning, num, routes, capacity)
 
+
+def a_star_plan(search, planning, num, routes, capacity):
+    searcher = AStarSearch()
+    search_problem = search[num - 1]
+    if capacity != -1:
+        search_problem = DeliveryConstrainedProblem(
+            search_problem.start_state, search_problem.orders,
+            search_problem.map_routes, capacity)
+    print("The orders list is:"),
+    for order in search_problem.orders:
+        print("(", order.source, ",", order.destination, ")")
+    start_time = time.time()
+    optimal_path, total_cost = searcher.a_star(search_problem,
+                                               heuristic=maxPointAirDistHeuristic)
+    end_time = time.time()
+    elapsed_time = (end_time - start_time)
+    print(f"A* found the optimal path with cost", total_cost,
+          "in %.2f seconds" % elapsed_time, "\nBy taking this path:")
+    show_path(optimal_path)
+
+def planning_plan(search, planning, num, routes, capacity):
+    planning_problem = planning[num - 1]
+    start_time = time.time()
+    if num > 6:
+        plan = a_star_search_planning(planning_problem, null_heuristic)
+    else:
+        plan = a_star_search_planning(planning_problem, max_level)
+    end_time = time.time()
+    elapsed_time = (end_time - start_time)
+    check_plan(elapsed_time, plan, routes)
 
 def check_plan(elapsed_time, plan, routes):
     if plan is not None:
@@ -573,6 +576,8 @@ def main():
     problems, routes = create_A_search_problems(commands)
     probs = create_planning_problem(commands)
 
+    choices = {"a_star":a_star_plan, "planning": planning_plan}
+
     if options.capacity != -1 and options.capacity <= 0:
         print("Usage: Capacity can't be negative!.")
         exit(1)
@@ -580,16 +585,16 @@ def main():
         print("Usage: Capacity is not supported using planning.")
         exit(1)
     elif options.user == 1 and options.num == -1:
-        user_problem(commands, options.capacity, options.search_choice)
+        user_problem(commands, options.capacity, choices[options.search_choice])
     elif options.user == 1 and options.num > -1:
-        user_problem(commands, options.capacity, options.search_choice,
+        user_problem(commands, options.capacity, choices[options.search_choice],
                      options.num)
     elif options.user == 0 and options.num != -1:
         if options.num > 10 or options.num < 1:
             print("Usage: ordersNum runs with less than 11 orders.")
             exit(1)
         run_num_orders(problems, probs, options.num, routes, options.capacity,
-                       options.search_choice)
+                       choices[options.search_choice])
     elif options.results == 1:
         compare(problems, probs, routes)
         constraint_probs, _ = create_constraint_A_search_problems(commands)
