@@ -1,0 +1,26 @@
+SOURCES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+DESTS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+A_STAR = "a_star"
+PLANNING = "planning"
+CAPACITY_USAGE = "Usage: Capacity can't be negative!."
+CAPACITY_NOT_SUPPORTED = "Usage: Capacity is not supported using planning."
+ORDERS_NUM_USAGE = "Usage: Automated ordersNum runs with less than 9 orders."
+RESULTS_USAGE = "Results runs alone!"
+
+USER_INPUT = "Please enter your first order (letter-number), then click ENTER: "
+REPEATED_INPUT = "You entered this order, another order then click ENTER: "
+WRONG_FORMAT ="Wrong format."
+DONE = "done"
+USERS_FILE = "user_orders.txt"
+SHOW_MAP = "Click enter to see the MAP!'\n Close it, then write your orders! "
+INSTRUCTION = "Write your list, one another one. When done write done!"
+PLAN_FOUND = "Planning found a plan with %d actions and %.2f cost in %.2f seconds"
+PLANNING_PATH = "By following the plan above, taking this path:"
+PLAN_NOT_FOUND = "Could not find a plan in %.2f seconds"
+START_LOCATION = "#"
+A_STAR_PATH = f"A* found the optimal path with cost"
+PATH = "\nBy taking this path:"
+ORDERS_LIST= "The orders list is:"
+MAP_JPG = 'map_f.jpg'
+DOMAIN = "domain"
+PROBLEM = "problem"
