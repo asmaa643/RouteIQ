@@ -1,6 +1,6 @@
 RouteIQ is our AI project.
 
-To run the code, download the files, commit and choose what to run:
+To run the code, download the files/Clone and choose what to run:
 
 --map='map file'
 
